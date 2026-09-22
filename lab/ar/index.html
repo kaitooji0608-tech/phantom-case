@@ -2,28 +2,47 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>AR Lab</title>
-<script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AR Debug Lab</title>
+
+<script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+
 <style>
-html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000}
-#guide{
- position:fixed;z-index:10;top:12px;left:12px;right:12px;
- background:rgba(5,12,22,.82);color:white;padding:12px 14px;border-radius:12px;
- font-family:system-ui,-apple-system,sans-serif;border:1px solid rgba(255,255,255,.18)
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000;font-family:system-ui,-apple-system,sans-serif}
+#status{
+  position:fixed;z-index:9999;left:12px;right:12px;top:12px;
+  padding:12px 14px;border-radius:12px;
+  background:rgba(3,10,18,.86);color:#fff;
+  border:1px solid rgba(255,255,255,.2);
 }
-#guide small{color:#b9c9dd}
+#status b{display:block;margin-bottom:4px}
+#state{color:#ffd166}
+#help{
+  position:fixed;z-index:9999;left:12px;right:12px;bottom:12px;
+  padding:10px 12px;border-radius:12px;background:rgba(3,10,18,.75);
+  color:#c9d6e5;font-size:13px
+}
 </style>
 </head>
+
 <body>
-<div id="guide">
-  <b>IMAGE TRACKING AR TEST</b><br>
-  <small>カメラを許可して、別画面に表示したテストカードへ向けてください。認識すると「PHANTOM DETECTED」がカード上に固定されます。</small>
+<div id="status">
+  <b>AR DEBUG</b>
+  状態: <span id="state">ページ読み込み中...</span>
+</div>
+<div id="help">
+  PCで <b>/lab/ar-target/</b> を開き、そのカード画像全体が見えるようにして、
+  スマホのカメラを正面から向けてください。
 </div>
 
 <a-scene
-  mindar-image="imageTargetSrc: https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.5/examples/image-tracking/assets/card-example/card.mind;"
+  id="scene"
+  mindar-image="
+    imageTargetSrc: https://cdn.jsdelivr.net/gh/hiukim/mind-ar-js@1.2.5/examples/image-tracking/assets/card-example/card.mind;
+    warmupTolerance: 1;
+    missTolerance: 5;
+  "
   color-space="sRGB"
   renderer="colorManagement: true, physicallyCorrectLights"
   vr-mode-ui="enabled: false"
@@ -36,20 +55,60 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000}
 
   <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-  <a-entity mindar-image-target="targetIndex: 0">
-    <a-plane color="#111827" opacity="0.9" position="0 0 0.05" width="1.05" height="0.58"></a-plane>
-    <a-text value="PHANTOM\nDETECTED"
-      color="#ffcf70"
+  <a-entity id="target" mindar-image-target="targetIndex: 0">
+    <!-- 認識したらカード上に大きな赤い板と文字を出す -->
+    <a-plane
+      position="0 0 0.05"
+      width="1"
+      height="0.552"
+      color="#7d1010"
+      opacity="0.82">
+    </a-plane>
+
+    <a-text
+      value="PHANTOM\nDETECTED"
+      position="0 0 0.10"
       align="center"
-      width="2.2"
-      position="0 0 0.08"
-      animation="property: scale; from: 0.92 0.92 0.92; to: 1.08 1.08 1.08; dur: 700; loop: true; dir: alternate">
+      color="#ffffff"
+      width="2.2">
     </a-text>
-    <a-ring color="#ffcf70" radius-inner="0.43" radius-outer="0.46"
-      position="0 0 0.07"
-      animation="property: rotation; to: 0 0 360; dur: 3500; loop: true; easing: linear">
-    </a-ring>
+
+    <a-box
+      position="0 0.38 0.12"
+      width="0.16"
+      height="0.16"
+      depth="0.16"
+      color="#ffd166"
+      animation="property: rotation; to: 0 360 360; loop: true; dur: 1800; easing: linear">
+    </a-box>
   </a-entity>
 </a-scene>
+
+<script>
+const state = document.getElementById("state");
+const scene = document.getElementById("scene");
+const target = document.getElementById("target");
+
+scene.addEventListener("arReady", () => {
+  state.textContent = "カメラ起動OK / ターゲットを探しています";
+  state.style.color = "#67e8a5";
+});
+
+scene.addEventListener("arError", () => {
+  state.textContent = "AR起動エラー（カメラまたはブラウザ）";
+  state.style.color = "#ff6b7a";
+});
+
+target.addEventListener("targetFound", () => {
+  state.textContent = "TARGET FOUND ✓";
+  state.style.color = "#67e8a5";
+  if (navigator.vibrate) navigator.vibrate([100,50,180]);
+});
+
+target.addEventListener("targetLost", () => {
+  state.textContent = "ターゲットを見失いました";
+  state.style.color = "#ffd166";
+});
+</script>
 </body>
 </html>
