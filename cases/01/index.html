@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#07111f">
+<title>CASE 01 | 怪盗特別捜査本部</title>
+<style>
+:root{--bg:#07111f;--panel:#0d1a2b;--line:#294466;--text:#eef5ff;--muted:#91a5bf;--blue:#65aaff;--red:#ff6678;--gold:#d8b36a;--green:#62dda0}
+*{box-sizing:border-box}
+html{background:var(--bg)}
+body{margin:0;background:radial-gradient(circle at 15% 0%,rgba(53,108,179,.18),transparent 30%),linear-gradient(180deg,#06101c,var(--bg));color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif}
+main{max-width:760px;margin:auto;padding:24px 16px 60px}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;color:var(--muted);font-size:12px;letter-spacing:.08em}
+.logo{font-weight:800;color:#b9d8ff}.secure{color:var(--green)}
+.hero{border:1px solid var(--line);border-radius:20px;padding:22px;background:linear-gradient(145deg,rgba(17,32,52,.95),rgba(8,18,31,.95));box-shadow:0 22px 60px rgba(0,0,0,.24)}
+.kicker{font-size:12px;letter-spacing:.18em;color:var(--blue)}
+h1{font-size:29px;line-height:1.35;margin:9px 0}
+.statusline{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+.pill{padding:6px 10px;border-radius:999px;border:1px solid var(--line);font-size:12px;background:#0a1625;color:#bad0e9}
+.pill.red{border-color:#673442;color:#ff91a0}.pill.gold{border-color:#665638;color:#eed08c}
+section{margin-top:18px;border:1px solid var(--line);border-radius:17px;padding:18px;background:rgba(13,26,43,.86)}
+h2{margin:0 0 14px;font-size:17px;letter-spacing:.04em}
+.grid{display:grid;grid-template-columns:145px 1fr;gap:10px 12px;font-size:14px}
+.label{color:var(--muted)}.value{font-weight:650}
+.redacted{display:inline-block;background:#05080d;color:#05080d;border-radius:3px;padding:0 16px;user-select:none}
+.summary{line-height:1.85;color:#d8e4f1;font-size:14px}
+.suspect{display:grid;grid-template-columns:76px 1fr;gap:15px;align-items:start}
+.avatar{width:76px;height:76px;border-radius:15px;border:1px solid #5f5035;background:linear-gradient(145deg,#342a1d,#17130e);position:relative}
+.avatar:after{content:"?";position:absolute;inset:0;display:grid;place-items:center;color:#f0d28e;font-weight:900;font-size:29px}
+.name{font-size:20px;font-weight:900;color:#f0d28e}.sub{font-size:12px;color:var(--muted);margin-top:3px}
+ul{padding-left:19px;margin:12px 0 0}li{margin:8px 0;line-height:1.65;font-size:14px;color:#d5e0ec}
+.timeline{position:relative;margin-left:5px}.event{border-left:2px solid #28486d;padding:0 0 18px 18px;position:relative}.event:last-child{padding-bottom:0}
+.event:before{content:"";position:absolute;left:-6px;top:3px;width:10px;height:10px;border-radius:50%;background:#5aa1f0;box-shadow:0 0 0 4px #0d1a2b}
+.time{color:#81baff;font-size:12px;font-weight:800}.event p{margin:6px 0 0;font-size:14px;line-height:1.7;color:#d9e4ef}
+.evidence{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.ev{border:1px solid #243c59;border-radius:12px;padding:13px;background:#0a1625}
+.ev b{font-size:13px}.ev small{display:block;color:var(--muted);margin-top:5px;line-height:1.5}
+.memo{border-left:3px solid var(--gold);padding-left:14px;line-height:1.8;color:#e5d6b6;font-size:14px}
+.related{display:flex;justify-content:space-between;align-items:center;gap:10px;border:1px dashed #3a4c61;border-radius:12px;padding:13px;margin-top:10px}
+.lock{color:#73869e;font-size:12px}footer{text-align:center;color:#60758f;font-size:11px;margin-top:30px;line-height:1.8}
+a.back{display:inline-block;color:#8fc2ff;text-decoration:none;margin-top:18px;font-size:13px}
+@media(max-width:520px){h1{font-size:24px}.grid{grid-template-columns:105px 1fr}.evidence{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<main>
+  <div class="top"><div class="logo">怪盗特別捜査本部</div><div class="secure">● SECURE DATABASE</div></div>
+
+  <div class="hero">
+    <div class="kicker">INCIDENT RECORD / CASE 01</div>
+    <h1>高知誕生日プレゼント盗難事件</h1>
+    <div class="statusline">
+      <span class="pill">発生日 2022.10.02</span>
+      <span class="pill">高知県</span>
+      <span class="pill red">被疑者未確保</span>
+      <span class="pill gold">怪盗ヘンタイおじさん関連</span>
+    </div>
+  </div>
+
+  <section>
+    <h2>事件概要</h2>
+    <div class="grid">
+      <div class="label">事件番号</div><div class="value">PH-01</div>
+      <div class="label">発生日</div><div class="value">2022年10月2日</div>
+      <div class="label">発生場所</div><div class="value">高知県</div>
+      <div class="label">被害者</div><div class="value"><span class="redacted">REDACTED</span></div>
+      <div class="label">被害品</div><div class="value">誕生日プレゼント</div>
+      <div class="label">事件状況</div><div class="value" style="color:#ff91a0">未解決 / 被疑者未確保</div>
+    </div>
+    <p class="summary">被害者の誕生日を翌日に控えた2022年10月2日、誕生日プレゼントが何者かによって持ち去られた。現場には複数の暗号および謎が残されており、被害者がそれらを順次解読した結果、プレゼントは無事に回収された。一連の手口および残されたメッセージから、通称「怪盗ヘンタイおじさん」による犯行と判断されている。</p>
+  </section>
+
+  <section>
+    <h2>被疑者情報</h2>
+    <div class="suspect">
+      <div class="avatar"></div>
+      <div><div class="name">怪盗ヘンタイおじさん</div><div class="sub">通称 / K.H.O. / 現在逃走中</div></div>
+    </div>
+    <ul>
+      <li>犯行現場に謎解き・暗号・メッセージを残す特徴がある。</li>
+      <li>金銭的利益を目的とした一般的な窃盗犯とは行動傾向が異なる。</li>
+      <li>CASE 01では、最終的に被害品を被害者自身が回収できるよう誘導していた。</li>
+      <li>捜査班では「誕生日を祝うこと自体が犯行目的の一部であった可能性」を指摘している。</li>
+      <li>中目黒周辺のキャバクラに頻繁に出入りしているとの情報あり。捜査上の重要性は不明。</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>事件経過</h2>
+    <div class="timeline">
+      <div class="event"><div class="time">2022.10.02</div><p>誕生日プレゼントの消失を確認。現場に怪盗ヘンタイおじさんによるものとみられるメッセージが残される。</p></div>
+      <div class="event"><div class="time">同日</div><p>被害者が犯人の残した複数の謎を解読。プレゼントの所在につながる情報を順次取得。</p></div>
+      <div class="event"><div class="time">同日</div><p>被害者がプレゼントを回収。人的被害なし。</p></div>
+      <div class="event"><div class="time">以降</div><p>怪盗ヘンタイおじさんの身柄確保には至らず。関連情報の収集を継続。</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>主な証拠・特徴</h2>
+    <div class="evidence">
+      <div class="ev"><b>E-01 / 犯行メッセージ</b><small>被害者に対し、謎を解くよう要求する内容。</small></div>
+      <div class="ev"><b>E-02 / 複数の暗号</b><small>被害者本人の知識や記憶を利用した問題が含まれていた。</small></div>
+      <div class="ev"><b>E-03 / 誕生日プレゼント</b><small>最終的に被害者が回収。破損等は確認されていない。</small></div>
+      <div class="ev"><b>E-04 / 犯行動機</b><small>祝福目的の可能性。通常の窃盗事件とは異なる。</small></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>担当捜査官メモ</h2>
+    <div class="memo">本件は形式上「盗難事件」であるものの、被疑者は被害品の換金・処分を目的としていなかった可能性が高い。被害者に謎を解かせ、最終的に誕生日プレゼントへ到達させること自体が一連の犯行計画に含まれていたとみられる。<br><br>被疑者の行動は極めて迷惑ではあるが、被害者の誕生日を祝おうとしていた形跡も認められる。</div>
+  </section>
+
+  <section>
+    <h2>関連事件</h2>
+    <div class="related"><div><b>CASE 02</b><br><span style="color:#8799af;font-size:13px">新規関連事案</span></div><div class="lock">🔒 ACCESS RESTRICTED</div></div>
+  </section>
+
+  <a class="back" href="../../">← 捜査本部へ戻る</a>
+
+  <footer>PHANTOM SPECIAL INVESTIGATION UNIT<br>INCIDENT DATABASE / INTERNAL USE ONLY</footer>
+</main>
+</body>
+</html>
