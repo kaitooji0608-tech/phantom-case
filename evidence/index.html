@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Evidence Lab</title>
+<style>
+body{margin:0;background:#07111f;color:#eef5ff;font-family:system-ui,-apple-system,sans-serif}
+main{max-width:680px;margin:auto;padding:32px 18px}
+.card{background:#0d1a2b;border:1px solid #294466;border-radius:16px;padding:18px;margin:14px 0}
+.done{border-color:#2c9a6b}
+.badge{display:inline-block;padding:5px 9px;border-radius:999px;background:#152840;color:#9db5d0;font-size:12px}
+.done .badge{background:#163c2c;color:#78e5ac}
+a{color:#67aefc}
+button{width:100%;padding:12px;border:1px solid #365b89;border-radius:12px;background:#10233b;color:white;font-weight:700}
+</style>
+</head>
+<body><main>
+<h1>EVIDENCE DATABASE</h1>
+<p>QR/NFC個別ページのテストです。各ページを開くと、この端末に発見済みとして保存されます。</p>
+
+<div id="items"></div>
+
+<div class="card">
+  <button id="reset">テスト記録をリセット</button>
+</div>
+
+<script>
+const clues = [
+  {id:"mirror", name:"EVIDENCE 01 / MIRROR", url:"./mirror/"},
+  {id:"kitchen", name:"EVIDENCE 02 / KITCHEN", url:"./kitchen/"},
+  {id:"entrance", name:"EVIDENCE 03 / ENTRANCE", url:"./entrance/"}
+];
+
+const wrap = document.getElementById("items");
+for(const c of clues){
+  const found = localStorage.getItem("evidence_"+c.id)==="1";
+  const d=document.createElement("div");
+  d.className="card"+(found?" done":"");
+  d.innerHTML=`
+    <span class="badge">${found?"FOUND ✓":"NOT FOUND"}</span>
+    <h2>${c.name}</h2>
+    <p><a href="${c.url}">テストページを開く</a></p>`;
+  wrap.appendChild(d);
+}
+document.getElementById("reset").onclick=()=>{
+  for(const c of clues) localStorage.removeItem("evidence_"+c.id);
+  location.reload();
+};
+</script>
+</main></body>
+</html>
