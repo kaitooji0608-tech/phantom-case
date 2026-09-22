@@ -110,19 +110,6 @@ body {
   color: #c6d5e5;
 }
 
-.reset-button {
-  border: 1px solid rgba(255,255,255,.28);
-  background: transparent;
-  color: #d8e3ef;
-  border-radius: 8px;
-  padding: 6px 8px;
-  font-size: 11px;
-  cursor: pointer;
-}
-
-.reset-button:hover {
-  background: rgba(255,255,255,.08);
-}
 
 .security-strip {
   padding: 7px 14px;
@@ -393,7 +380,6 @@ body {
   }
   .link-cards { grid-template-columns: 1fr; }
   .message-stack { max-width: 84%; }
-  .reset-button { font-size: 10px; padding: 5px 7px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
