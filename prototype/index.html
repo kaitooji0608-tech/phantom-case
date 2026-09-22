@@ -1,52 +1,345 @@
-<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>警察チャット TEST</title><style>
-:root{--bg:#07111f;--panel:#0d1a2b;--line:#294466;--text:#eef5ff;--muted:#91a5bf;--blue:#67adff;--red:#ff6f82;--green:#63dfa0;--gold:#dfbb70}
-*{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,#06101c,#07111f);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif;min-height:100vh}
-.wrap{max-width:760px;margin:auto;padding:22px 15px 60px}.top{display:flex;justify-content:space-between;gap:10px;color:var(--muted);font-size:12px;margin-bottom:16px}.brand{font-weight:900;color:#bddbff}.secure{color:var(--green)}
-.card{background:rgba(13,26,43,.96);border:1px solid var(--line);border-radius:18px;padding:18px;margin:14px 0}.small{font-size:12px;color:var(--muted);line-height:1.6}.muted{color:var(--muted)}h1{font-size:25px;margin:5px 0 12px}h2{font-size:17px;margin:0 0 12px}
-button,.btn{border:1px solid #3b6594;background:#102846;color:#fff;border-radius:12px;padding:12px 14px;font-weight:800;cursor:pointer;text-decoration:none;display:inline-block}.btn.secondary{background:#0b1828;color:#c3d4e6;border-color:#2b455f}
-input{width:100%;border:1px solid #365778;border-radius:12px;background:#081522;color:#fff;padding:13px 14px;font-size:16px}.row{display:flex;gap:8px;flex-wrap:wrap}.notice{border-left:3px solid var(--gold);padding:10px 13px;background:#111b25;border-radius:8px;line-height:1.75}.danger{border-left-color:var(--red)}.badge{display:inline-block;border:1px solid #365574;border-radius:999px;padding:5px 9px;font-size:11px;color:#c6d8eb}
-
-.chat{display:flex;flex-direction:column;gap:10px}.msg{max-width:88%;padding:12px 14px;border-radius:15px;line-height:1.7;font-size:14px}.police{background:#12263e;border:1px solid #294b70}.me{background:#17392f;border:1px solid #2f6455;align-self:flex-end}.system{align-self:stretch;max-width:100%;text-align:center;background:#0a1522;border:1px dashed #35516f;color:#9fb4ca;font-size:12px}.controls{display:grid;gap:8px;margin-top:14px}.name{font-size:11px;color:#79baff;font-weight:800;margin-bottom:4px}
-</style></head><body><div class="wrap">
-<div class="top"><div class="brand">怪盗特別捜査本部 / TEST</div><div class="secure">● SECURE</div></div>
-<div class="card"><div class="small">機能検証版</div><h1>捜査官 佐伯</h1><div id="chat" class="chat"></div><div id="controls" class="controls"></div></div>
-<button class="btn secondary" onclick="resetAll()">テスト進捗をリセット</button>
-</div>
-<script>
-const K='phantom_arg_test_'; const chat=document.getElementById('chat'); const controls=document.getElementById('controls');
-const get=(k,d='')=>localStorage.getItem(K+k)??d; const set=(k,v)=>localStorage.setItem(K+k,v);
-function add(t,type='police'){const d=document.createElement('div');d.className='msg '+type;d.innerHTML=(type==='police'?'<div class="name">捜査官 佐伯</div>':'')+t;chat.appendChild(d);window.scrollTo(0,document.body.scrollHeight)}
-function clearC(){controls.innerHTML=''}
-function addBtn(label,fn){const b=document.createElement('button');b.textContent=label;b.onclick=fn;controls.appendChild(b)}
-function addInput(ph,fn){const i=document.createElement('input');i.placeholder=ph;const b=document.createElement('button');b.textContent='送信';b.onclick=()=>fn(i.value);i.onkeydown=e=>{if(e.key==='Enter')fn(i.value)};controls.append(i,b);i.focus()}
-function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
-function boot(){
- chat.innerHTML='';clearC();
- const stage=get('stage','intro'); const hacked=get('unregistered','0')==='1';
- if(hacked && stage!=='puzzle' && stage!=='done') return hackedFlow();
- if(stage==='intro'){
-   add('突然のご連絡失礼いたします。こちらは、怪盗事件に関する捜査を担当している特別捜査本部です。');
-   add('過去の事件記録との照合のため、まずご本人確認をさせてください。');
-   add('怪盗による犯行が発生した<strong>日付</strong>を入力してください。');
-   addInput('例：2022/10/02',checkDate);
- } else if(stage==='place'){
-   add('日付を照合しました。続いて、事件が発生した<strong>都道府県</strong>を入力してください。');addInput('都道府県名',checkPlace);
- } else if(stage==='review'){
-   add('本人照会は完了しています。CASE13の記録内容をご確認いただき、当時の状況と大きな相違がないか確認してください。');addBtn('警察データベースを開く',()=>location.href='db/');
- } else if(stage==='puzzle'){
-   add('未登録資料について確認済みです。引き続き解析へのご協力をお願いします。');addBtn('解析対象ページを開く',()=>location.href='puzzle/');
- } else {add('テストフローは完了しています。');addBtn('DBを開く',()=>location.href='db/')}
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#07111f">
+<title>怪盗特別捜査本部 | 捜査通信</title>
+<style>
+:root{
+  --bg:#07111f; --panel:#0d1a2b; --line:#294466; --text:#eef5ff;
+  --muted:#91a5bf; --blue:#67adff; --green:#63dfa0; --red:#ff7184;
 }
-function cleanDate(v){return v.trim().replace(/[年月-]/g,'/').replace(/日/g,'').replace(/\s/g,'')}
-function checkDate(v){add(esc(v),'me');clearC();const n=cleanDate(v);
- if(n==='2022/10/2'||n==='2022/10/02'){set('stage','place');add('照合しました。');setTimeout(boot,350)}
- else if(n==='2022/10/3'||n==='2022/10/03'){add('その日は、お誕生日の日付ではありませんか？<br>確認したいのは、<strong>犯行が発生した日</strong>です。もう一度思い出してみてください。');addInput('犯行日',checkDate)}
- else{add('記録と一致しません。もう一度入力してください。');addInput('犯行日',checkDate)}}
-function checkPlace(v){add(esc(v),'me');clearC();const n=v.trim().replace(/県$/,'');
- if(n==='高知'){add('……照合完了しました。');add('2022年10月2日、高知県で発生した<strong>CASE13「高知誕生日プレゼント盗難事件」</strong>の被害者の方ですね。');add('現在、過去の怪盗関連事件について記録の再整理を行っています。CASE13についても当時の資料をデータベースへ移行しました。');add('お手数ですが、事件記録をご確認いただき、<strong>当時の状況と大きな相違がないか</strong>確認してください。');set('stage','review');addBtn('事件記録を確認する',()=>location.href='db/case/013/')}
- else{add('記録と一致しません。都道府県名をご確認ください。');addInput('都道府県名',checkPlace)}}
-function hackedFlow(){add('本人照会済み。CASE13の記録確認をお願いしていました。');add('SYSTEM：未登録資料へのアクセスを検知しました。','system');add('少々お待ちください。');add('あなたの閲覧セッションから<strong>CASE13-X</strong>という未登録資料へのアクセスが確認されました。');add('CASE13-Xというページを開きましたか？');
- addBtn('はい',()=>{clearC();add('はい','me');add('……その資料は、こちらで作成したものではありません。');add('システム管理側の記録にも、正式な捜査資料としての登録がありません。何者かがデータベース内へ追加した可能性があります。');add('さらに、ページ内容はCASE13の被害者であるあなたに向けられたものと考えられます。');add('安全性を確認したうえで、可能であれば引き続き解析にご協力いただきたいのですが、よろしいですか？');addBtn('協力する',()=>{clearC();add('協力します','me');set('stage','puzzle');add('ありがとうございます。解析対象へのアクセスを許可します。');addBtn('解析対象ページを開く',()=>location.href='puzzle/')})})}
-function resetAll(){Object.keys(localStorage).filter(k=>k.startsWith(K)).forEach(k=>localStorage.removeItem(k));location.reload()}
-boot();
-</script></body></html>
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:#07111f;color:var(--text);
+font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif}
+body{background:linear-gradient(180deg,#06101c,#07111f 72%)}
+.app{max-width:760px;margin:auto;min-height:100vh;display:flex;flex-direction:column}
+.header{
+  position:sticky;top:0;z-index:10;padding:14px 15px 12px;
+  background:rgba(7,17,31,.95);backdrop-filter:blur(12px);
+  border-bottom:1px solid #203751
+}
+.headrow{display:flex;align-items:center;gap:11px}
+.avatar{
+  width:42px;height:42px;border-radius:50%;display:grid;place-items:center;
+  background:#122943;border:1px solid #31577f;font-weight:900;color:#9fcaff
+}
+.hname{font-weight:900;font-size:15px}.hsub{font-size:11px;color:var(--green);margin-top:2px}
+.chat{flex:1;padding:20px 14px 145px;display:flex;flex-direction:column;gap:10px}
+.day{text-align:center;color:#7087a0;font-size:11px;margin:3px 0 8px}
+.msgrow{display:flex;flex-direction:column;align-items:flex-start}
+.msgrow.me{align-items:flex-end}
+.name{font-size:10px;color:#6faeea;margin:0 0 4px 6px}
+.bubble{
+  max-width:88%;padding:11px 14px;border-radius:16px;line-height:1.72;
+  font-size:14px;white-space:normal;overflow-wrap:anywhere
+}
+.police .bubble{
+  background:#11263e;border:1px solid #284b70;border-bottom-left-radius:5px
+}
+.me .bubble{
+  background:#173b31;border:1px solid #2b6553;border-bottom-right-radius:5px
+}
+.system{
+  align-self:stretch;text-align:center;color:#8fa6be;font-size:11px;
+  border:1px dashed #314b67;background:#0a1522;padding:8px 10px;border-radius:10px
+}
+.time{font-size:9px;color:#61758b;margin:3px 6px 0}
+.typing{
+  display:inline-flex;gap:4px;align-items:center;min-width:48px
+}
+.typing i{width:6px;height:6px;border-radius:50%;background:#88a2bd;animation:b 1.2s infinite}
+.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
+@keyframes b{0%,60%,100%{opacity:.25;transform:translateY(0)}30%{opacity:1;transform:translateY(-3px)}}
+
+.linkcard{
+  margin-top:8px;border:1px solid #3b638e;border-radius:12px;padding:12px;
+  background:#0b1a2b;color:#dbeaff;text-decoration:none;display:block
+}
+.linkcard strong{display:block;font-size:13px;margin-bottom:3px}
+.linkcard span{font-size:11px;color:#88a4c0}
+
+.composer{
+  position:fixed;left:50%;transform:translateX(-50%);bottom:0;width:min(760px,100%);
+  padding:10px 12px calc(10px + env(safe-area-inset-bottom));
+  background:rgba(7,17,31,.97);border-top:1px solid #203751;backdrop-filter:blur(14px)
+}
+.composeRow{display:grid;grid-template-columns:1fr auto;gap:8px}
+textarea{
+  resize:none;max-height:110px;min-height:44px;border:1px solid #345879;border-radius:18px;
+  background:#0a1725;color:#fff;padding:11px 14px;font:inherit;outline:none
+}
+textarea:focus{border-color:#5e9bd6}
+.send{
+  width:48px;height:44px;border-radius:50%;border:1px solid #497bad;background:#15385d;
+  color:white;font-size:18px;cursor:pointer
+}
+.send:disabled{opacity:.35;cursor:not-allowed}
+.tools{display:flex;justify-content:space-between;align-items:center;margin-top:6px}
+.hint{font-size:10px;color:#667c94}
+.reset{border:0;background:transparent;color:#607a94;font-size:10px;cursor:pointer}
+.unread{color:var(--red)}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="headrow">
+      <div class="avatar">警</div>
+      <div>
+        <div class="hname">捜査官 佐伯</div>
+        <div class="hsub">● オンライン / 怪盗特別捜査本部</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="chat" class="chat">
+    <div class="day">捜査通信 / 暗号化接続</div>
+  </div>
+
+  <div class="composer">
+    <div class="composeRow">
+      <textarea id="input" rows="1" placeholder="メッセージを入力"></textarea>
+      <button id="send" class="send" aria-label="送信">➤</button>
+    </div>
+    <div class="tools">
+      <span id="hint" class="hint">自由に入力できます</span>
+      <button class="reset" onclick="resetTest()">テストをリセット</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const PREFIX='phantom_arg_test_';
+const chat=document.getElementById('chat');
+const input=document.getElementById('input');
+const send=document.getElementById('send');
+const hint=document.getElementById('hint');
+
+let queue=[];
+let busy=false;
+let waitingFor=null;
+let stage=localStorage.getItem(PREFIX+'stage') || 'start';
+
+function now(){
+  return new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'});
+}
+function scrollBottom(){setTimeout(()=>window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'}),50)}
+function police(text, html=false){
+  const row=document.createElement('div');
+  row.className='msgrow police';
+  row.innerHTML=`<div class="name">捜査官 佐伯</div><div class="bubble">${html?text:escapeHtml(text)}</div><div class="time">${now()}</div>`;
+  chat.appendChild(row); scrollBottom();
+}
+function mine(text){
+  const row=document.createElement('div'); row.className='msgrow me';
+  row.innerHTML=`<div class="bubble">${escapeHtml(text)}</div><div class="time">${now()}</div>`;
+  chat.appendChild(row); scrollBottom();
+}
+function system(text){
+  const d=document.createElement('div'); d.className='system'; d.textContent=text;
+  chat.appendChild(d); scrollBottom();
+}
+function typing(show=true){
+  let el=document.getElementById('typing');
+  if(show && !el){
+    el=document.createElement('div'); el.id='typing'; el.className='msgrow police';
+    el.innerHTML='<div class="name">捜査官 佐伯</div><div class="bubble"><span class="typing"><i></i><i></i><i></i></span></div>';
+    chat.appendChild(el); scrollBottom();
+  } else if(!show && el) el.remove();
+}
+function escapeHtml(s){
+  return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+}
+function wait(ms){return new Promise(r=>setTimeout(r,ms))}
+async function speakSequence(messages, nextWait=null){
+  busy=true; send.disabled=false; // still allow user to type while messages are arriving
+  for(const item of messages){
+    typing(true);
+    await wait(item.delay ?? 2300);
+    typing(false);
+    police(item.text, !!item.html);
+    await wait(450);
+  }
+  busy=false;
+  if(nextWait){
+    waitingFor=nextWait;
+    updateHint();
+  }
+}
+function updateHint(){
+  const map={
+    date:'犯行日を入力してください',
+    place:'事件発生場所を入力してください',
+    confirm_case:'内容確認後、DBから戻ってきてください',
+    hacked_confirm:'「はい」など自由な文章で回答できます',
+    cooperate:'協力する旨を入力してください'
+  };
+  hint.textContent=map[waitingFor] || '自由に入力できます';
+}
+function normDate(s){
+  return s.trim()
+   .replace(/[年月.-]/g,'/')
+   .replace(/日/g,'')
+   .replace(/\s/g,'')
+   .replace(/\/+/g,'/');
+}
+function hasYes(s){
+  return /(はい|そう|開いた|見た|確認した|あります|しました|yes|ok|協力)/i.test(s);
+}
+function setStage(v){
+  stage=v; localStorage.setItem(PREFIX+'stage',v);
+}
+function addLinkCard(title,sub,href){
+  police(`<a class="linkcard" href="${href}"><strong>${escapeHtml(title)}</strong><span>${escapeHtml(sub)}</span></a>`,true);
+}
+
+async function bootstrap(){
+  const hacked=localStorage.getItem(PREFIX+'unregistered')==='1';
+
+  if(hacked && stage!=='puzzle_ready' && stage!=='done'){
+    waitingFor=null;
+    system('閲覧セッションを復元しました');
+    await speakSequence([
+      {text:'少々お待ちください。'},
+      {text:'今、あなたの閲覧セッションから、未登録資料へのアクセスが検知されました。'},
+      {text:'「CASE13-X」というページを開きましたか？'}
+    ],'hacked_confirm');
+    return;
+  }
+
+  if(stage==='start'){
+    await speakSequence([
+      {text:'突然のご連絡失礼いたします。'},
+      {text:'こちらは、怪盗事件に関する捜査を担当している特別捜査本部です。'},
+      {text:'過去の事件記録との照合のため、まずご本人確認をさせてください。'},
+      {text:'怪盗による犯行が発生した日付を入力してください。'}
+    ],'date');
+  } else if(stage==='place'){
+    await speakSequence([{text:'事件が発生した都道府県名を入力してください。'}],'place');
+  } else if(stage==='db_review'){
+    await speakSequence([
+      {text:'本人照会は完了しています。'},
+      {text:'CASE13の記録内容をご確認いただき、当時の状況と大きな相違がないか確認してください。'}
+    ]);
+    addLinkCard('CASE13を確認する','警察事件データベースを開きます','db/case/013/');
+    waitingFor='confirm_case'; updateHint();
+  } else if(stage==='puzzle_ready'){
+    await speakSequence([{text:'未登録資料について確認済みです。引き続き解析へのご協力をお願いします。'}]);
+    addLinkCard('解析対象を開く','UNKNOWN SOURCE / TEST-01','puzzle/');
+  } else {
+    await speakSequence([{text:'テストフローは完了しています。'}]);
+    addLinkCard('警察DBを開く','事件データベースへ','db/');
+  }
+}
+
+async function handle(text){
+  const raw=text.trim();
+  if(!raw) return;
+  mine(raw);
+  input.value=''; input.style.height='44px';
+
+  if(waitingFor==='date'){
+    const d=normDate(raw);
+    if(['2022/10/2','2022/10/02','2022/10/2/','2022/10/02/'].includes(d)){
+      waitingFor=null; setStage('place');
+      await speakSequence([
+        {text:'照合しました。'},
+        {text:'続いて、事件が発生した都道府県名を入力してください。'}
+      ],'place');
+    } else if(['2022/10/3','2022/10/03','2022/10/3/','2022/10/03/'].includes(d)){
+      await speakSequence([
+        {text:'その日は、お誕生日の日付ではありませんか？'},
+        {text:'確認したいのは、誕生日ではなく「犯行が発生した日」です。もう一度思い出してみてください。'}
+      ],'date');
+    } else {
+      await speakSequence([{text:'記録と一致しません。もう一度、犯行が発生した日付を入力してください。'}],'date');
+    }
+    return;
+  }
+
+  if(waitingFor==='place'){
+    const p=raw.replace(/\s/g,'').replace(/県$/,'');
+    if(p.includes('高知')){
+      waitingFor=null; setStage('db_review');
+      await speakSequence([
+        {text:'……照合完了しました。'},
+        {text:'2022年10月2日、高知県で発生したCASE13「高知誕生日プレゼント盗難事件」の被害者の方ですね。'},
+        {text:'現在、過去の怪盗関連事件について記録の再整理を行っています。'},
+        {text:'CASE13についても当時の資料をデータベースへ移行しました。'},
+        {text:'お手数ですが、事件記録をご確認いただき、当時の状況と大きな相違がないか確認していただけますか。'}
+      ]);
+      addLinkCard('事件記録を確認する','CASE13 / 高知誕生日プレゼント盗難事件','db/case/013/');
+      waitingFor='confirm_case'; updateHint();
+    } else {
+      await speakSequence([{text:'記録と一致しません。都道府県名をご確認ください。'}],'place');
+    }
+    return;
+  }
+
+  if(waitingFor==='hacked_confirm'){
+    if(hasYes(raw)){
+      waitingFor=null;
+      await speakSequence([
+        {text:'……その資料は、こちらで作成したものではありません。'},
+        {text:'システム管理側の記録にも、正式な捜査資料としての登録がありません。'},
+        {text:'何者かがデータベース内へ追加した可能性があります。'},
+        {text:'さらに、内容からCASE13の被害者であるあなたに向けられたものと考えられます。'},
+        {text:'安全性を確認したうえで、可能であれば引き続き解析にご協力いただきたいのですが、よろしいですか？'}
+      ],'cooperate');
+    } else {
+      await speakSequence([
+        {text:'承知しました。念のため、閲覧履歴をこちらでも再確認します。'},
+        {text:'もしCASE13-Xをご覧になった場合は、その旨を教えてください。'}
+      ],'hacked_confirm');
+    }
+    return;
+  }
+
+  if(waitingFor==='cooperate'){
+    if(hasYes(raw)){
+      waitingFor=null; setStage('puzzle_ready');
+      await speakSequence([
+        {text:'ありがとうございます。'},
+        {text:'解析対象へのアクセスを許可します。'}
+      ]);
+      addLinkCard('解析対象ページを開く','UNKNOWN SOURCE / TEST-01','puzzle/');
+    } else {
+      await speakSequence([{text:'承知しました。協力いただける場合は、その旨をこの通信でお知らせください。'}],'cooperate');
+    }
+    return;
+  }
+
+  // Generic free-text fallback
+  if(/db|データベース|事件記録|case/i.test(raw)){
+    await speakSequence([{text:'事件記録はデータベースから確認できます。必要に応じてご参照ください。'}]);
+    addLinkCard('警察DBを開く','怪盗事件データベース','db/');
+  } else if(/怪盗|ヘンタイ|ジョナサン|スケベ/.test(raw)){
+    await speakSequence([{text:'その人物に関する情報も捜査資料に含まれています。現時点では記録上確認できる内容のみご案内します。'}]);
+  } else {
+    await speakSequence([{text:'メッセージを確認しました。現在の捜査記録と照合します。'}]);
+  }
+}
+
+send.addEventListener('click',()=>handle(input.value));
+input.addEventListener('keydown',e=>{
+  if(e.key==='Enter' && !e.shiftKey){
+    e.preventDefault();
+    handle(input.value);
+  }
+});
+input.addEventListener('input',()=>{
+  input.style.height='44px';
+  input.style.height=Math.min(input.scrollHeight,110)+'px';
+});
+
+function resetTest(){
+  Object.keys(localStorage).filter(k=>k.startsWith(PREFIX)).forEach(k=>localStorage.removeItem(k));
+  location.reload();
+}
+
+bootstrap();
+</script>
+</body>
+</html>
