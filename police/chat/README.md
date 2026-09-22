@@ -49,3 +49,8 @@ https://phantom-case-police.github.io/phantom-case/police/chat/?reset=1
 ## CASE13の場所
 
 2022年10月2日、愛媛県松山市（道後温泉）。本人確認では「愛媛」「愛媛県」「松山」「松山市」「道後」「道後温泉」を正解として扱います。
+
+
+## v5
+
+チャット表示前に「怪盗関連事件特別捜査本部 / SECURE CHAT / セキュアチャットを開始します」の開始画面を表示します。画面クリックまたはEnter/Spaceでチャットを開始します。

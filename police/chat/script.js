@@ -526,11 +526,35 @@
     history.replaceState({}, "", window.location.pathname);
   }
 
-  // ---------- Boot ----------
-  const restored = loadState();
-  if (restored) {
-    restoreUiForPhase();
+  // ---------- Start screen / Boot ----------
+  async function enterSecureChat() {
+    if (!startScreen || startScreen.classList.contains("is-hidden")) return;
+
+    startScreen.classList.add("is-hidden");
+    await sleep(420);
+
+    const restored = loadState();
+    if (restored) {
+      restoreUiForPhase();
+    } else {
+      startFlow();
+    }
+  }
+
+  if (startScreen) {
+    startScreen.addEventListener("click", enterSecureChat);
+    startScreen.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        enterSecureChat();
+      }
+    });
   } else {
-    startFlow();
+    const restored = loadState();
+    if (restored) {
+      restoreUiForPhase();
+    } else {
+      startFlow();
+    }
   }
 })();
