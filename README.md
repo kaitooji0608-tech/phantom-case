@@ -164,3 +164,16 @@ v5から localStorage のキーを
 へ変更しています。
 
 そのためv4系の壊れたテスト状態を引き継ぎません。
+
+
+# v5.1 deployment check
+
+This build uses unique filenames to avoid stale browser/CDN assets:
+- /assets/state-v51.js
+- /police/chat/app-v51.js
+
+When the correct version is deployed, the chat header shows `TEST BUILD v5.1`.
+After cooperation, URLs are sent as clickable chat messages; the old bottom buttons must NOT appear.
+
+Recommended test URL:
+https://phantom-case-police.github.io/phantom-case/police/chat/?reset=1&build=51

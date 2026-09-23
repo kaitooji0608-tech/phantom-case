@@ -52,3 +52,5 @@ header strong{display:block;margin-top:3px}
   overflow-wrap:anywhere;
 }
 .ojisan .chat-url{color:#7a2f3a}
+
+.build-badge{display:inline-block;margin-left:8px;font-size:9px;font-weight:600;color:#9fb5ca;border:1px solid rgba(159,181,202,.35);padding:2px 5px;border-radius:999px;vertical-align:middle}
