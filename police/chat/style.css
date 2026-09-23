@@ -44,3 +44,11 @@ header strong{display:block;margin-top:3px}
 .start-box .seal{margin:0 auto 20px}
 .start-box h1{font-size:42px;letter-spacing:.12em;margin:8px 0}
 .start-box small{display:block;margin-top:34px;opacity:.7}
+
+.chat-url{
+  color:#155f9f;
+  text-decoration:underline;
+  text-underline-offset:2px;
+  overflow-wrap:anywhere;
+}
+.ojisan .chat-url{color:#7a2f3a}

@@ -1,6 +1,6 @@
 
 window.PhantomState = (() => {
-  const KEY = "phantom_case_master_state_v4";
+  const KEY = "phantom_case_master_state_v5";
 
   const defaults = {
     identityVerified:false,
