@@ -112,3 +112,11 @@ https://phantom-case-police.github.io/phantom-case/police/
 
 ゲーム開始：
 https://phantom-case-police.github.io/phantom-case/police/chat/
+
+
+## v9 public police site
+- Header redesigned based on the supplied institutional-site reference.
+- Site-wide search moved to the top-right header and searches pages, staff, suspects, case records, and news.
+- Added /police/about/, /police/message/, /police/contact/, /police/search/.
+- Added generated fictional institutional-building hero image.
+- Secure chat is still hidden from normal global navigation. During an active chat session, only the session-return strip appears.
