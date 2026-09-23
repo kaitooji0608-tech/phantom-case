@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="../assets/common.css">
+<title>END</title>
+</head>
+<body>
+<div class="shell"><div class="panel">
+<div class="topbar"><div class="kicker">FINAL</div><h1>ENDING</h1></div>
+<div class="content">
+<div id="locked" class="card hidden">
+<span class="status lock">LOCKED</span>
+<p>まだ3つの痕跡が揃っていません。</p>
+<a class="btn secondary" href="../house/">家謎へ戻る</a>
+</div>
+<div id="end" class="card hidden">
+<div class="system">ALL TRACES FOUND</div>
+<h2>END（仮）</h2>
+<p>ここに最終問題「今回、何を盗んだ？」→「何も盗んでいない」→誕生日サプライズを実装する予定です。</p>
+<p class="muted">今回は全体のページ遷移と状態管理の確認用なので、エンディング演出は仮表示です。</p>
+</div>
+</div></div></div>
+<script src="../assets/state.js"></script>
+<script>
+const s=PhantomState.load();
+document.getElementById("locked").classList.toggle("hidden",!!s.endingUnlocked);
+document.getElementById("end").classList.toggle("hidden",!s.endingUnlocked);
+</script>
+</body></html>

@@ -1,560 +1,334 @@
 (() => {
-  "use strict";
+const log=document.getElementById("log");
+const actions=document.getElementById("actions");
+const composer=document.getElementById("composer");
+const input=document.getElementById("input");
+const startScreen=document.getElementById("startScreen");
+const headerName=document.getElementById("headerName");
 
-  // ===== 後からURLや待ち時間を調整する場所 =====
-  const CONFIG = {
-    messageDelay: 3000,
-    typingLeadTime: 850,
-    puzzleUrl: "../../mystery/", // 仮URL
-    databaseUrl: "../db/",      // 仮URL
-    saveProgress: true
-  };
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 
-  const STORAGE_KEY = "phantom-case-police-chat-v2";
+function getState(){return PhantomState.load();}
+function saveState(s){PhantomState.save(s);}
 
-  const messageList = document.getElementById("messageList");
-  const typingIndicator = document.getElementById("typingIndicator");
-  const actionArea = document.getElementById("actionArea");
-  const chatForm = document.getElementById("chatForm");
-  const chatInput = document.getElementById("chatInput");
-  const sendButton = document.getElementById("sendButton");
+function addMessage(text,sender="police",persist=true){
+  const row=document.createElement("div");
+  row.className="msg "+sender;
+  const bubble=document.createElement("div");
+  bubble.className="bubble";
+  bubble.textContent=text;
+  row.appendChild(bubble);
+  log.appendChild(row);
+  log.scrollTop=log.scrollHeight;
 
-  const state = {
-    phase: "boot",
-    dateFailures: 0,
-    locationFailures: 0,
-    declineCount: 0,
-    busy: false,
-    completed: false
-  };
-
-  // ---------- Utility ----------
-  const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-
-  function nowText() {
-    return new Intl.DateTimeFormat("ja-JP", {
-      hour: "2-digit",
-      minute: "2-digit"
-    }).format(new Date());
-  }
-
-  function scrollToBottom() {
-    requestAnimationFrame(() => {
-      messageList.scrollTop = messageList.scrollHeight;
+  if(persist){
+    PhantomState.update(s=>{
+      s.chat.transcript.push({kind:"msg",sender,text});
     });
   }
+}
 
-  function setTyping(visible) {
-    typingIndicator.classList.toggle("is-hidden", !visible);
-    scrollToBottom();
+function addSystem(text,persist=true){
+  const div=document.createElement("div");
+  div.className="sys";
+  div.textContent=text;
+  log.appendChild(div);
+  log.scrollTop=log.scrollHeight;
+  if(persist){
+    PhantomState.update(s=>{
+      s.chat.transcript.push({kind:"sys",text});
+    });
   }
+}
 
-  function setInputEnabled(value, placeholder = "メッセージを入力") {
-    chatInput.disabled = !value;
-    sendButton.disabled = !value;
-    chatInput.placeholder = placeholder;
-    if (value) {
-      window.setTimeout(() => chatInput.focus(), 80);
+async function say(text,sender="police"){
+  await sleep(350);
+  addMessage(text,sender);
+  await sleep(350);
+}
+
+async function seq(items){
+  for(const item of items){
+    if(typeof item==="string") await say(item,"police");
+    else await say(item.text,item.sender||"police");
+  }
+}
+
+function clearActions(){actions.innerHTML="";}
+function makeButton(label,handler,secondary=false){
+  const b=document.createElement("button");
+  b.textContent=label;
+  if(secondary)b.className="secondary";
+  b.onclick=handler;
+  actions.appendChild(b);
+}
+function makeLink(label,href,secondary=false){
+  const a=document.createElement("a");
+  a.textContent=label;
+  a.href=href;
+  if(secondary)a.className="secondary";
+  actions.appendChild(a);
+}
+
+function restoreTranscript(){
+  const s=getState();
+  s.chat.transcript.forEach(item=>{
+    if(item.kind==="sys") addSystem(item.text,false);
+    else addMessage(item.text,item.sender,false);
+  });
+}
+
+function dateOK(t){
+  const s=t.replace(/[０-９]/g,c=>String.fromCharCode(c.charCodeAt(0)-0xFEE0))
+    .replace(/\s/g,"").replace(/年|月/g,"/").replace(/日/g,"")
+    .replace(/[.\-]/g,"/").replace(/\/+/g,"/");
+  return /(^|\/)2022\/10\/0?2$|^10\/0?2$/.test(s);
+}
+function placeOK(t){return /愛媛|松山|道後/.test(t);}
+
+async function startFresh(){
+  await seq([
+    "こんにちは。怪盗関連事件特別捜査本部の相沢です。",
+    "過去に怪盗被害に遭われた方へ、順番にご連絡しています。",
+    "まず本人確認をお願いします。",
+    "事件が起きた日付を入力してください。"
+  ]);
+  PhantomState.update(s=>{s.chat.phase="date";});
+}
+
+async function onUserText(t){
+  const s=getState();
+  addMessage(t,"user");
+
+  if(s.chat.phase==="date"){
+    if(dateOK(t)){
+      await say("確認できました。次に、事件が起きた場所を入力してください。");
+      PhantomState.update(x=>{x.chat.phase="place";});
+    }else{
+      await say("このQRに紐づく事件記録と一致しません。");
     }
+    return;
   }
 
-  function clearActions() {
-    actionArea.innerHTML = "";
-  }
-
-  function addMessage(text, sender = "police") {
-    const row = document.createElement("div");
-    row.className = `message-row ${sender === "user" ? "user" : "police"}`;
-
-    if (sender !== "user") {
-      const avatar = document.createElement("div");
-      avatar.className = "avatar";
-      avatar.setAttribute("aria-hidden", "true");
-      avatar.textContent = "相";
-      row.appendChild(avatar);
-    }
-
-    const stack = document.createElement("div");
-    stack.className = "message-stack";
-
-    if (sender !== "user") {
-      const senderName = document.createElement("div");
-      senderName.className = "sender";
-      senderName.textContent = "相沢 直人";
-      stack.appendChild(senderName);
-    }
-
-    const bubble = document.createElement("div");
-    bubble.className = "bubble";
-    bubble.textContent = text;
-    stack.appendChild(bubble);
-
-    const time = document.createElement("div");
-    time.className = "time";
-    time.textContent = nowText();
-    stack.appendChild(time);
-
-    row.appendChild(stack);
-    messageList.appendChild(row);
-    scrollToBottom();
-  }
-
-  async function policeSay(text, delay = CONFIG.messageDelay) {
-    setInputEnabled(false, "相沢が入力中…");
-    setTyping(true);
-
-    const typingMs = Math.min(CONFIG.typingLeadTime, Math.max(350, delay - 250));
-    await sleep(typingMs);
-
-    setTyping(false);
-    addMessage(text, "police");
-
-    const remain = Math.max(0, delay - typingMs);
-    if (remain > 0) await sleep(remain);
-  }
-
-  async function policeSequence(messages, finalDelay = 0) {
-    state.busy = true;
-    for (const item of messages) {
-      if (typeof item === "string") {
-        await policeSay(item);
-      } else {
-        await policeSay(item.text, item.delay ?? CONFIG.messageDelay);
-      }
-    }
-    if (finalDelay) await sleep(finalDelay);
-    state.busy = false;
-  }
-
-  function userSay(text) {
-    addMessage(text, "user");
-  }
-
-  function normalizeDigits(text) {
-    return text
-      .replace(/[０-９]/g, ch => String.fromCharCode(ch.charCodeAt(0) - 0xFEE0))
-      .trim();
-  }
-
-  function normalizeDate(raw) {
-    return normalizeDigits(raw)
-      .replace(/\s/g, "")
-      .replace(/年|月/g, "/")
-      .replace(/日/g, "")
-      .replace(/[.\-]/g, "/")
-      .replace(/\/+/g, "/")
-      .replace(/\/$/, "");
-  }
-
-  function isCorrectDate(raw) {
-    const s = normalizeDate(raw);
-    return new Set([
-      "2022/10/2", "2022/10/02",
-      "22/10/2", "22/10/02",
-      "10/2", "10/02"
-    ]).has(s);
-  }
-
-  function isBirthdayDate(raw) {
-    const s = normalizeDate(raw);
-    return new Set([
-      "2022/10/3", "2022/10/03",
-      "22/10/3", "22/10/03",
-      "10/3", "10/03"
-    ]).has(s);
-  }
-
-  function isCorrectLocation(raw) {
-    const s = normalizeDigits(raw)
-      .replace(/\s/g, "")
-      .replace(/[都道府県市]/g, "");
-    return s === "愛媛" || s === "松山" || s === "道後温泉" || s === "道後";
-  }
-
-  // ---------- Persistence ----------
-  function saveState() {
-    if (!CONFIG.saveProgress) return;
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({
-      ...state,
-      transcript: [...messageList.querySelectorAll(".message-row")].map(row => ({
-        sender: row.classList.contains("user") ? "user" : "police",
-        text: row.querySelector(".bubble")?.textContent ?? ""
-      }))
-    }));
-  }
-
-  function loadState() {
-    if (!CONFIG.saveProgress) return false;
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return false;
-
-    try {
-      const saved = JSON.parse(raw);
-      Object.assign(state, saved);
-
-      if (Array.isArray(saved.transcript)) {
-        saved.transcript.forEach(item => addMessage(item.text, item.sender));
-      }
-      return true;
-    } catch {
-      localStorage.removeItem(STORAGE_KEY);
-      return false;
-    }
-  }
-
-  function restoreUiForPhase() {
-    clearActions();
-
-    if (state.phase === "date") {
-      setInputEnabled(true, "事件が起きた日付を入力");
-    } else if (state.phase === "location") {
-      setInputEnabled(true, "事件が起きた都道府県または市名を入力");
-    } else if (state.phase === "cooperation") {
-      setInputEnabled(true, "メッセージを入力");
-      showCooperationChoices();
-    } else if (state.phase === "forced-cooperation") {
-      setInputEnabled(true, "メッセージを入力");
-      showForcedCooperationChoice();
-    } else if (state.phase === "resources" || state.completed) {
-      setInputEnabled(true, "気付いたことがあれば入力");
-      showResourceCards();
-    } else {
-      setInputEnabled(false, "少々お待ちください");
-    }
-  }
-
-  // ---------- Flow ----------
-  async function startFlow() {
-    state.phase = "intro";
-    setInputEnabled(false, "少々お待ちください");
-
-    await policeSequence([
-      "こんにちは。\n怪盗関連事件特別捜査本部の相沢です。",
-      "急に手紙が届いて、びっくりしましたよね。",
-      "現在、過去に怪盗事件の被害に遭われた方へ、確認のため順番にご連絡しています。",
-      "今回お送りしたQRコードは、送付先ごとに個別に発行しています。",
-      "ご本人以外の方が手紙を見る可能性もありますので、まず簡単な確認だけさせてください。",
-      "この案内に関係する怪盗事件が起きた日を覚えていますか？",
-      "事件が起きた日付を入力してください。"
-    ]);
-
-    state.phase = "date";
-    setInputEnabled(true, "例：2022/10/2");
-    saveState();
-  }
-
-  async function handleDate(text) {
-    if (isCorrectDate(text)) {
-      await policeSequence([
-        "はい、合っています。",
-        "ありがとうございます。",
-        "もう一つだけお願いします。",
-        "その事件が起きた場所はどこでしたか？\n都道府県または市名で入力してください。"
+  if(s.chat.phase==="place"){
+    if(placeOK(t)){
+      await seq([
+        "本人確認できました。CASE13「松山誕生日プレゼント盗難事件」の被害者の方ですね。",
+        "出所不明のWebページを確認しています。前回と同じように謎が含まれているようです。",
+        "解析に協力してもらえますか？"
       ]);
-      state.phase = "location";
-      setInputEnabled(true, "都道府県または市名を入力");
-      saveState();
-      return;
+      PhantomState.update(x=>{x.identityVerified=true;x.chat.phase="cooperate";});
+      renderActions();
+    }else{
+      await say("このQRに紐づく事件記録と一致しません。");
     }
-
-    state.dateFailures += 1;
-
-    if (isBirthdayDate(text)) {
-      await policeSequence([
-        "惜しいです。",
-        "10月3日は誕生日ですね。",
-        "確認したいのは、怪盗による事件が起きた日です。",
-        "もう一度思い出してみてください。"
-      ]);
-    } else if (state.dateFailures >= 3) {
-      await policeSequence([
-        "その日付は、この案内に紐づいている事件記録と一致しません。",
-        "ヒントを出しますね。",
-        "事件が起きたのは、誕生日の前日です。"
-      ]);
-    } else {
-      await policeSequence([
-        "その日付は、この案内に紐づいている事件記録と一致しません。",
-        "当時のことを思い出して、もう一度入力してみてください。"
-      ]);
-    }
-
-    state.phase = "date";
-    setInputEnabled(true, "事件が起きた日付を入力");
-    saveState();
+    return;
   }
 
-  async function handleLocation(text) {
-    if (isCorrectLocation(text)) {
-      await policeSequence([
-        "確認できました。",
-        "ご本人確認は以上です。ありがとうございます。",
-        "2022年10月2日、愛媛県松山市（道後温泉）で発生した\nCASE13「松山誕生日プレゼント盗難事件」",
-        "怪盗ヘンタイおじさんによる事件ですね。",
-        "……ちょっと待ってください。",
-        "今、当時の記録を確認していたんですが。",
-        "この事件、今回こちらで調べている件と少し似ていますね。",
-        "実は数日前、捜査本部で出所の分からないWebページを確認しました。",
-        "誰が作ったのか、どこから公開されたのかは、まだ分かっていません。",
-        "ただ、中には暗号のようなものや、過去の怪盗事件を思わせる内容があります。",
-        "特に、怪盗ヘンタイおじさんの事件と似ている部分がありまして。",
-        "もちろん、現時点では本人が作ったものだとは断定できません。",
-        "CASE13では、怪盗から謎を出されて、それを解いてプレゼントを取り戻していますよね。",
-        "今回のページにも、似たような仕掛けがあるようなんです。",
-        "実際にあの怪盗の謎を解いたことがある方なら、何か気付くことがあるかもしれません。",
-        "よければ、一度ページを見てもらえませんか？"
-      ]);
+  await say("ありがとうございます。こちらでも確認します。");
+}
 
-      state.phase = "cooperation";
-      setInputEnabled(true, "メッセージを入力");
-      showCooperationChoices();
-      saveState();
-      return;
-    }
+async function chooseCooperation(ok){
+  clearActions();
+  addMessage(ok?"捜査に協力する":"今回は協力しない","user");
 
-    state.locationFailures += 1;
+  const s=getState();
 
-    if (state.locationFailures >= 3) {
-      await policeSequence([
-        "その場所は、この案内に紐づいている事件記録と一致しません。",
-        "ヒントです。",
-        "事件が起きたのは四国地方です。"
-      ]);
-    } else {
-      await policeSequence([
-        "その場所は、この案内に紐づいている事件記録と一致しません。",
-        "当時、旅行先で事件に遭われていたはずです。"
-      ]);
-    }
-
-    state.phase = "location";
-    setInputEnabled(true, "事件が起きた都道府県または市名を入力");
-    saveState();
-  }
-
-  function makeChoiceButton(label, className, onClick) {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = className;
-    button.textContent = label;
-    button.addEventListener("click", onClick);
-    return button;
-  }
-
-  function showCooperationChoices() {
-    clearActions();
-
-    const wrap = document.createElement("div");
-    wrap.className = "choice-group";
-
-    wrap.append(
-      makeChoiceButton("捜査に協力する", "choice-button primary", () => chooseCooperation(true)),
-      makeChoiceButton("今回は協力しない", "choice-button", () => chooseCooperation(false))
-    );
-
-    actionArea.appendChild(wrap);
-  }
-
-  function showForcedCooperationChoice() {
-    clearActions();
-
-    const wrap = document.createElement("div");
-    wrap.className = "choice-group";
-    wrap.append(
-      makeChoiceButton("捜査に協力する", "choice-button primary", () => chooseCooperation(true))
-    );
-    actionArea.appendChild(wrap);
-  }
-
-  async function chooseCooperation(accept) {
-    if (state.busy) return;
-    clearActions();
-
-    if (accept) {
-      userSay("捜査に協力する");
-      await acceptCooperation();
-      return;
-    }
-
-    userSay("今回は協力しない");
-    await declineCooperation();
-  }
-
-  async function acceptCooperation() {
-    await policeSequence([
-      state.declineCount > 0
-        ? "ありがとうございます！\nよかったです。"
-        : "ありがとうございます。助かります。",
-      "では、問題のページを共有しますね。",
-      "あわせて、参考用の資料もお送りします。",
-      "過去の怪盗事件をまとめた、捜査協力者向けの事件データベースです。",
-      "今回のページを確認するのに必要かどうかは分かりませんが、気になることがあれば見てみてください。"
-    ]);
-
-    state.phase = "resources";
-    state.completed = true;
-    showResourceCards();
-
-    await policeSequence([
-      "ページを見ている途中でも、このチャットにはいつでも戻ってきて大丈夫です。",
-      "何か見つけたら、気軽に送ってください。",
-      "それでは、よろしくお願いします。"
-    ], 100);
-
-    setInputEnabled(true, "気付いたことがあれば入力");
-    saveState();
-  }
-
-  async function declineCooperation() {
-    state.declineCount += 1;
-
-    if (state.declineCount === 1) {
-      await policeSequence([
-        "えっ。",
-        "協力してくれないんですか？",
-        "……冗談ですよね？",
-        "大丈夫です。もう一度聞きますね。"
-      ]);
-      state.phase = "cooperation";
-      setInputEnabled(true, "メッセージを入力");
-      showCooperationChoices();
-    } else {
-      await policeSequence([
-        "……本当にもう一回押しましたね。",
-        "ここまで断られるとは思ってませんでした。",
-        "一応、捜査協力は任意なんですけど。",
-        "……さすがにお願いします（笑）"
-      ]);
-      state.phase = "forced-cooperation";
-      setInputEnabled(true, "メッセージを入力");
-      showForcedCooperationChoice();
-    }
-
-    saveState();
-  }
-
-  function showResourceCards() {
-    clearActions();
-
-    const wrap = document.createElement("div");
-    wrap.className = "link-cards";
-
-    const puzzle = document.createElement("a");
-    puzzle.className = "resource-card";
-    puzzle.href = CONFIG.puzzleUrl;
-    puzzle.innerHTML = `
-      <span class="card-kicker">捜査対象</span>
-      <span class="card-title">出所不明Webページ</span>
-      <span class="card-desc">作成者不明 / 怪盗ヘンタイおじさんとの関連を調査中</span>
-    `;
-
-    const db = document.createElement("a");
-    db.className = "resource-card";
-    db.href = CONFIG.databaseUrl;
-    db.innerHTML = `
-      <span class="card-kicker">参考資料</span>
-      <span class="card-title">怪盗関連事件データベース</span>
-      <span class="card-desc">過去の怪盗関連事件記録</span>
-    `;
-
-    wrap.append(puzzle, db);
-    actionArea.appendChild(wrap);
-  }
-
-  async function handleFreeText() {
-    await policeSequence([
+  if(ok){
+    await seq([
       "ありがとうございます。",
-      "内容はこちらでも確認してみます。",
-      "ほかにも気になることがあれば、そのまま送ってください。"
+      "問題のページと参考資料DBを共有します。"
     ]);
-    setInputEnabled(true, "気付いたことがあれば入力");
-    saveState();
+    PhantomState.update(x=>{x.cooperationAccepted=true;x.chat.phase="investigate";});
+    renderActions();
+    return;
   }
 
-  // ---------- Events ----------
-  chatForm.addEventListener("submit", async (event) => {
-    event.preventDefault();
-    if (state.busy || chatInput.disabled) return;
+  const count=s.chat.declines+1;
+  PhantomState.update(x=>{x.chat.declines=count;});
 
-    const text = chatInput.value.trim();
-    if (!text) return;
+  if(count===1){
+    await seq(["えっ。","協力してくれないんですか？","……冗談ですよね？"]);
+    renderActions();
+  }else{
+    await seq(["……強いですね。","さすがにお願いします（笑）"]);
+    PhantomState.update(x=>{x.chat.phase="forced";});
+    renderActions();
+  }
+}
 
-    chatInput.value = "";
-    userSay(text);
+async function handleDarkReport(){
+  clearActions();
+  addMessage("3つの記録を確認しました","user");
+  await seq([
+    "……これ、本当なんでしょうか。",
+    "僕も聞いたことがない内容です。",
+    "こちらで原記録との照合を始めます。"
+  ]);
 
-    if (state.phase === "date") {
-      await handleDate(text);
-    } else if (state.phase === "location") {
-      await handleLocation(text);
-    } else if (state.phase === "cooperation") {
-      const normalized = text.replace(/\s/g, "");
-      if (/協力する|はい|やります|手伝/.test(normalized)) {
-        await acceptCooperation();
-      } else if (/協力しない|いいえ|やめ|断/.test(normalized)) {
-        await declineCooperation();
-      } else {
-        await policeSequence([
-          "ありがとうございます。",
-          "すみません、この確認だけ下のボタンから選んでもらえますか？"
-        ]);
-        showCooperationChoices();
-        setInputEnabled(true, "メッセージを入力");
-      }
-    } else if (state.phase === "forced-cooperation") {
-      const normalized = text.replace(/\s/g, "");
-      if (/協力する|はい|やります|手伝/.test(normalized)) {
-        await acceptCooperation();
-      } else {
-        await policeSequence([
-          "もう選択肢はひとつです（笑）",
-          "上のボタンからお願いします。"
-        ]);
-        showForcedCooperationChoice();
-        setInputEnabled(true, "メッセージを入力");
-      }
-    } else if (state.phase === "resources" || state.completed) {
-      await handleFreeText(text);
-    }
+  addSystem("CONNECTION INTERRUPTED");
+  addSystem("UNKNOWN USER CONNECTED");
+  headerName.textContent="UNKNOWN USER";
 
-    saveState();
+  await seq([
+    {text:"あれ！？ 相沢クンまだ疑ってるの！？",sender:"ojisan"},
+    {text:"ナチちゃんが自分で見つけたんだから、ちゃんと調べてネ😅",sender:"ojisan"},
+    {text:"おじさんたち怪盗も悪いことはするヨ！？ でも、やってないことまで怪盗のせいにされたら困るのヨ〜💦",sender:"ojisan"},
+    {text:"まぁ難しい話はこのへんにして……。ところでサ！！",sender:"ojisan"},
+    {text:"前回みたいに、もうちょっと遊んでいかない！？😄",sender:"ojisan"}
+  ]);
+
+  PhantomState.update(x=>{
+    x.darkReported=true;
+    x.ojisanFirstAppearance=true;
+    x.houseUnlocked=true;
   });
 
-  // テスト用の隠しリセット。画面にはボタンを出さない。
-  // URL末尾に ?reset=1 を付けて開くと進行状況を消せます。
-  if (new URLSearchParams(window.location.search).get("reset") === "1") {
-    localStorage.removeItem(STORAGE_KEY);
-    history.replaceState({}, "", window.location.pathname);
+  addSystem("UNKNOWN USER DISCONNECTED");
+  headerName.textContent="相沢 直人";
+
+  await seq([
+    "……戻りました。",
+    "外部接続はこちらでも確認しました。",
+    "先ほどの3件は、こちらで真偽確認を進めます。",
+    "怪盗が残した新しいページについては、引き続き確認をお願いします。"
+  ]);
+
+  PhantomState.update(x=>{x.chat.phase="house-start";});
+  renderActions();
+}
+
+async function handleSquirrelReport(){
+  clearActions();
+  addMessage("リスのQRを見つけました","user");
+
+  await seq([
+    "確認しました。",
+    "ところで、どうやってこのQRを見つけたんですか？"
+  ]);
+
+  PhantomState.update(x=>{x.squirrelReported=true;x.chat.phase="squirrel-how";});
+  renderActions();
+}
+
+async function handleSquirrelHow(){
+  clearActions();
+  addMessage("家にあるリスの置物についていました","user");
+  await seq([
+    "……家の中の置物ですか？",
+    "そのQRは、もともと付いていたものではないですよね？"
+  ]);
+  PhantomState.update(x=>{x.chat.phase="squirrel-original";});
+  renderActions();
+}
+
+async function handleSquirrelOriginal(){
+  clearActions();
+  addMessage("もともとは付いていません","user");
+  await seq([
+    "分かりました。",
+    "だとすると、ページを作った人物がご自宅の中に入った可能性があります。",
+    "こちらでも確認します。",
+    "ページには、まだ3つの痕跡が残されているようです。",
+    "無理のない範囲で、続きの確認をお願いします。"
+  ]);
+  PhantomState.update(x=>{
+    x.intrusionConcern=true;
+    x.traceSearchUnlocked=true;
+    x.chat.phase="trace-search";
+  });
+  renderActions();
+}
+
+function renderActions(){
+  clearActions();
+  const s=getState();
+
+  if(s.chat.phase==="cooperate"){
+    makeButton("捜査に協力する",()=>chooseCooperation(true));
+    makeButton("今回は協力しない",()=>chooseCooperation(false),true);
+    return;
   }
-
-  // ---------- Start screen / Boot ----------
-  async function enterSecureChat() {
-    if (!startScreen || startScreen.classList.contains("is-hidden")) return;
-
-    startScreen.classList.add("is-hidden");
-    await sleep(420);
-
-    const restored = loadState();
-    if (restored) {
-      restoreUiForPhase();
-    } else {
-      startFlow();
+  if(s.chat.phase==="forced"){
+    makeButton("捜査に協力する",()=>chooseCooperation(true));
+    return;
+  }
+  if(s.chat.phase==="investigate"){
+    makeLink("出所不明Webページを開く","../../mystery/");
+    makeLink("参考資料DBを開く","../db/",true);
+    if(s.darkKeys.one && s.darkKeys.two && s.darkKeys.three && !s.darkReported){
+      makeButton("3つの記録を相沢に報告する",handleDarkReport);
     }
+    return;
   }
+  if(s.chat.phase==="house-start"){
+    makeLink("怪盗が残した新しい謎ページ","../../house/");
+    return;
+  }
+  if(s.chat.phase==="squirrel-report"){
+    makeButton("リスのQRを相沢に報告する",handleSquirrelReport);
+    return;
+  }
+  if(s.chat.phase==="squirrel-how"){
+    makeButton("家にあるリスの置物についていました",handleSquirrelHow);
+    return;
+  }
+  if(s.chat.phase==="squirrel-original"){
+    makeButton("もともとは付いていません",handleSquirrelOriginal);
+    return;
+  }
+  if(s.chat.phase==="trace-search"){
+    makeLink("残り3つの痕跡を探す","../../house/");
+    return;
+  }
+}
 
-  if (startScreen) {
-    startScreen.addEventListener("click", enterSecureChat);
-    startScreen.addEventListener("keydown", (event) => {
-      if (event.key === "Enter" || event.key === " ") {
-        event.preventDefault();
-        enterSecureChat();
-      }
+function applyIncomingEvent(){
+  const q=new URLSearchParams(location.search);
+  const event=q.get("event");
+  if(!event)return;
+
+  if(event==="dark-cleared"){
+    PhantomState.update(s=>{
+      if(!s.darkReported) s.chat.phase="investigate";
     });
-  } else {
-    const restored = loadState();
-    if (restored) {
-      restoreUiForPhase();
-    } else {
-      startFlow();
-    }
   }
+
+  if(event==="squirrel-found"){
+    PhantomState.update(s=>{
+      s.squirrelQrFound=true;
+      if(!s.intrusionConcern) s.chat.phase="squirrel-report";
+    });
+  }
+
+  history.replaceState({}, "", location.pathname);
+}
+
+if(new URLSearchParams(location.search).get("reset")==="1"){
+  PhantomState.reset();
+  history.replaceState({}, "", location.pathname);
+}
+
+applyIncomingEvent();
+
+startScreen.addEventListener("click",async()=>{
+  startScreen.classList.add("off");
+  await sleep(250);
+
+  const s=getState();
+  if(s.chat.transcript.length){
+    restoreTranscript();
+    renderActions();
+  }else{
+    await startFresh();
+  }
+});
+
+composer.addEventListener("submit",e=>{
+  e.preventDefault();
+  const t=input.value.trim();
+  if(!t)return;
+  input.value="";
+  onUserText(t);
+});
 })();

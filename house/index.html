@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="../assets/common.css">
+<title>新しい謎</title>
+</head>
+<body>
+<div class="shell"><div class="panel">
+<div class="topbar"><div class="kicker">EXTRA GAME</div><h1>怪盗が残した新しい謎</h1></div>
+<div class="content">
+
+<div id="locked" class="card hidden">
+<span class="status lock">LOCKED</span>
+<p>まだこのページは解放されていません。</p>
+<a class="btn secondary" href="../police/chat/">警察チャットへ戻る</a>
+</div>
+
+<div id="squirrelStage" class="card hidden">
+<span class="status lock">QUESTION 01</span>
+<h3>最初の家謎</h3>
+<p>テスト問題：木の実を集める、小さなしっぽの動物は？</p>
+<form id="squirrelForm">
+<input id="squirrelInput" placeholder="答えを入力">
+<div id="squirrelMsg" class="answer"></div>
+</form>
+<div id="findSquirrel" class="hidden">
+<div class="system">ANSWER ACCEPTED</div>
+<p>答えは「リス」。では、そのリスを実際に探してください。</p>
+<p class="muted">本番では家にあるリスの置物を調べ、そこに付けたQRを読みます。</p>
+<a class="btn secondary" href="./qr-print/">テスト用QR一覧</a>
+</div>
+</div>
+
+<div id="waitingSquirrel" class="card hidden">
+<span class="status ok">QUESTION 01 CLEAR</span>
+<h3>リスを探してください</h3>
+<p>リスの置物にあるQRを読み取ると先へ進みます。</p>
+<a class="btn secondary" href="./squirrel/">テスト用：リスQRを開く</a>
+</div>
+
+<div id="waitingPolice" class="card hidden">
+<span class="status ok">TRACE 00 FOUND</span>
+<p>相沢への報告が必要です。</p>
+<a class="btn" href="../police/chat/?event=squirrel-found">警察チャットへ戻る</a>
+</div>
+
+<div id="traceStage" class="hidden">
+<div class="card">
+<h3>残された3つの痕跡</h3>
+<p class="muted">家に置いた3枚のQRを探し、それぞれの仮問題に答えるテストです。</p>
+<strong><span id="traceCount">0</span>/3 FOUND</strong>
+<div class="progress"><div id="traceBar"></div></div>
+</div>
+
+<div id="traceCards" class="trace-grid"></div>
+
+<div id="endingCard" class="card hidden">
+<div class="system">ALL TRACES FOUND</div>
+<p>3つすべて見つかりました。</p>
+<a class="btn ojisan" href="../ending/">最後のページへ</a>
+</div>
+
+<div class="row">
+<a class="btn secondary" href="./qr-print/">QRコード一覧</a>
+<a class="btn secondary" href="../police/chat/">警察チャット</a>
+</div>
+</div>
+
+</div></div></div>
+
+<script src="../assets/state.js"></script>
+<script>
+function render(){
+  const s=PhantomState.load();
+
+  ["locked","squirrelStage","waitingSquirrel","waitingPolice","traceStage"].forEach(id=>{
+    document.getElementById(id).classList.add("hidden");
+  });
+
+  if(!s.houseUnlocked){
+    document.getElementById("locked").classList.remove("hidden");
+    return;
+  }
+
+  if(!s.squirrelAnswered){
+    document.getElementById("squirrelStage").classList.remove("hidden");
+    return;
+  }
+
+  if(!s.squirrelQrFound){
+    document.getElementById("waitingSquirrel").classList.remove("hidden");
+    return;
+  }
+
+  if(!s.traceSearchUnlocked){
+    document.getElementById("waitingPolice").classList.remove("hidden");
+    return;
+  }
+
+  document.getElementById("traceStage").classList.remove("hidden");
+
+  const cards=document.getElementById("traceCards");
+  cards.innerHTML="";
+  const items=[
+    ["one","TRACE 01","./trace1/"],
+    ["two","TRACE 02","./trace2/"],
+    ["three","TRACE 03","./trace3/"]
+  ];
+  let count=0;
+
+  items.forEach(([key,title,href])=>{
+    const ok=!!s.traces[key];
+    if(ok)count++;
+    const div=document.createElement("div");
+    div.className="card";
+    div.innerHTML=`
+      <span class="status ${ok?"ok":"lock"}">${ok?"発見済み":"未発見"}</span>
+      <h3>${title}</h3>
+      <p class="muted">本番では家の中のQRから開きます。</p>
+      <a class="btn secondary" href="${href}">テスト用に開く</a>`;
+    cards.appendChild(div);
+  });
+
+  document.getElementById("traceCount").textContent=count;
+  document.getElementById("traceBar").style.width=(count/3*100)+"%";
+
+  if(count===3){
+    PhantomState.update(x=>{x.endingUnlocked=true;});
+    document.getElementById("endingCard").classList.remove("hidden");
+  }else{
+    document.getElementById("endingCard").classList.add("hidden");
+  }
+}
+
+document.getElementById("squirrelForm").addEventListener("submit",e=>{
+  e.preventDefault();
+  const input=document.getElementById("squirrelInput");
+  const msg=document.getElementById("squirrelMsg");
+  const v=input.value.trim().replace(/\s/g,"");
+  if(v==="リス"||v==="りす"){
+    PhantomState.update(s=>{s.squirrelAnswered=true;});
+    msg.textContent="正解。";
+    msg.style.color="#177245";
+    document.getElementById("findSquirrel").classList.remove("hidden");
+    setTimeout(render,700);
+  }else{
+    msg.textContent="違うようです。";
+    msg.style.color="#8b2733";
+  }
+});
+
+render();
+</script>
+</body></html>
