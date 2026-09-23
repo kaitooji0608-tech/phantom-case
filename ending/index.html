@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<link rel="stylesheet" href="../assets/common.css?v=51">
+<link rel="stylesheet" href="../assets/common.css?v=6">
 <title>ENDING</title>
 </head>
 <body>
@@ -24,7 +24,10 @@
       <h3>最後の問題</h3>
       <p>おじさんは今回、この家から何を盗んだでしょう！？</p>
       <form id="finalForm">
-        <input id="finalInput" placeholder="答えを入力">
+        <div class="answer-row">
+          <input id="finalInput" autocomplete="off" enterkeyhint="done" placeholder="答えを入力">
+          <button class="btn ojisan" type="submit">回答する</button>
+        </div>
         <div id="finalMsg" class="answer"></div>
       </form>
     </div>
@@ -40,7 +43,7 @@
   </div>
 </div></div>
 
-<script src="../assets/state-v51.js"></script>
+<script src="../assets/state-v6.js"></script>
 <script>
 function normalize(v){
   return v.trim().replace(/\s/g,"");
@@ -78,7 +81,7 @@ document.getElementById("finalForm").addEventListener("submit",e=>{
     PhantomState.update(s=>{s.endingComplete=true;});
     msg.textContent="正解。";
     msg.style.color="#177245";
-    setTimeout(render,400);
+    setTimeout(render,350);
   }else{
     msg.textContent="違うようです。";
     msg.style.color="#8b2733";

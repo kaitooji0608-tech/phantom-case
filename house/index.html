@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<link rel="stylesheet" href="../assets/common.css?v=51">
+<link rel="stylesheet" href="../assets/common.css?v=6">
 <title>怪盗が残した新しい謎</title>
 </head>
 <body>
@@ -26,7 +26,10 @@
       <h3>最初の家謎</h3>
       <p>テスト問題：木の実を集める、小さな動物は？</p>
       <form id="squirrelForm">
-        <input id="squirrelInput" placeholder="答えを入力">
+        <div class="answer-row">
+          <input id="squirrelInput" autocomplete="off" enterkeyhint="done" placeholder="答えを入力">
+          <button class="btn" type="submit">回答する</button>
+        </div>
         <div id="squirrelMsg" class="answer"></div>
       </form>
     </div>
@@ -35,7 +38,7 @@
       <span class="status ok">QUESTION 01 CLEAR</span>
       <div class="system">ANSWER : リス</div>
       <p>では、その「リス」を実際に探してください。</p>
-      <p class="muted">本番では、家にあるリスの置物にQRを付けます。</p>
+      <p class="muted">家にあるリスの置物にだけQRを付ける想定です。</p>
       <a class="btn secondary" href="./squirrel/">テスト用：リスのQRを開く</a>
     </div>
 
@@ -49,21 +52,25 @@
     <div id="traceStage" class="hidden">
       <div class="card">
         <h3>残された3つの痕跡</h3>
-        <p class="muted">本番では家の中に置いたQRを3つ探します。</p>
+        <p>
+          謎を解くと、痕跡が残されている<strong>場所</strong>が分かります。<br>
+          実際にその場所を探し、見つけたカードに書かれている<strong>キーワード</strong>を入力してください。
+        </p>
         <strong><span id="traceCount">0</span>/3 FOUND</strong>
         <div class="progress"><div id="traceBar"></div></div>
+        <div class="dev-note">現在は動作確認用の仮問題・仮キーワードです。あとで本番の謎／場所／キーワードに差し替えます。</div>
       </div>
 
-      <div id="traceCards" class="trace-grid"></div>
+      <div id="traceCards"></div>
 
       <div id="endingCard" class="card hidden">
         <div class="system">ALL TRACES FOUND</div>
-        <p>3つすべて見つかりました。</p>
+        <p>3つすべての痕跡を確認しました。</p>
         <a class="btn ojisan" href="../ending/">最後のページへ</a>
       </div>
 
       <div class="row">
-        <a class="btn secondary" href="./qr-print/">QRコード一覧</a>
+        <a class="btn secondary" href="./qr-print/">リス用QRを確認</a>
         <a class="btn secondary" href="../police/chat/">警察チャット</a>
       </div>
     </div>
@@ -71,10 +78,164 @@
   </div>
 </div></div>
 
-<script src="../assets/state-v51.js"></script>
+<script src="../assets/state-v6.js"></script>
 <script>
+const traceData={
+  one:{
+    title:"TRACE 01",
+    puzzle:"テスト問題：食べ物を冷たく保存する場所は？",
+    answers:["冷蔵庫","れいぞうこ"],
+    location:"冷蔵庫",
+    keywords:["マンボ"]
+  },
+  two:{
+    title:"TRACE 02",
+    puzzle:"テスト問題：眠るときに使う場所は？",
+    answers:["ベッド","べっど"],
+    location:"ベッド",
+    keywords:["サマンサ"]
+  },
+  three:{
+    title:"TRACE 03",
+    puzzle:"テスト問題：靴を脱いで家に入る場所は？",
+    answers:["玄関","げんかん"],
+    location:"玄関",
+    keywords:["おったまげ"]
+  }
+};
+
+const norm=v=>v.trim().replace(/\s+/g,"");
+
 function allTraces(s){
   return s.traces.one && s.traces.two && s.traces.three;
+}
+
+function renderTraceCards(){
+  const s=PhantomState.load();
+  const container=document.getElementById("traceCards");
+  container.innerHTML="";
+
+  Object.entries(traceData).forEach(([key,data])=>{
+    const locationSolved=!!s.traceLocations[key];
+    const found=!!s.traces[key];
+
+    const card=document.createElement("div");
+    card.className="card trace-card"+(found?" complete":"");
+    card.id="trace-"+key;
+
+    card.innerHTML=`
+      <span class="status ${found?"ok":locationSolved?"ok":"lock"}">
+        ${found?"TRACE FOUND":locationSolved?"場所判明":"謎未解決"}
+      </span>
+      <h3>${data.title}</h3>
+
+      <span class="step-label">STEP 1 / 謎を解く</span>
+      <p>${data.puzzle}</p>
+
+      <form class="trace-riddle" data-trace="${key}">
+        <div class="answer-row">
+          <input
+            autocomplete="off"
+            enterkeyhint="done"
+            placeholder="謎の答えを入力"
+            ${locationSolved?"disabled":""}
+          >
+          <button class="btn" type="submit" ${locationSolved?"disabled":""}>回答する</button>
+        </div>
+        <div class="answer riddle-msg"></div>
+      </form>
+
+      <div class="location-box ${locationSolved?"":"hidden"}" id="location-${key}">
+        <span class="step-label">STEP 2 / 場所を探す</span>
+        <span>痕跡がある場所</span>
+        <span class="location-name">${data.location}</span>
+        <p class="muted">実際にこの場所を調べてください。そこに怪盗が残したカードがある想定です。</p>
+
+        <div class="keyword-box">
+          <span class="step-label">STEP 3 / カードのキーワード</span>
+          <form class="trace-keyword" data-trace="${key}">
+            <div class="answer-row">
+              <input
+                autocomplete="off"
+                enterkeyhint="done"
+                placeholder="カードのキーワードを入力"
+                ${found?"disabled":""}
+              >
+              <button class="btn" type="submit" ${found?"disabled":""}>キーワードを確認</button>
+            </div>
+            <div class="answer keyword-msg">${found?"確認済み。":""}</div>
+          </form>
+        </div>
+      </div>
+    `;
+
+    container.appendChild(card);
+  });
+
+  bindTraceForms();
+}
+
+function bindTraceForms(){
+  document.querySelectorAll(".trace-riddle").forEach(form=>{
+    form.addEventListener("submit",e=>{
+      e.preventDefault();
+
+      const key=form.dataset.trace;
+      const data=traceData[key];
+      const input=form.querySelector("input");
+      const msg=form.querySelector(".riddle-msg");
+      const value=norm(input.value);
+
+      if(data.answers.some(a=>norm(a)===value)){
+        PhantomState.update(s=>{s.traceLocations[key]=true;});
+        msg.textContent="正解。場所が判明しました。";
+        msg.style.color="#177245";
+        render();
+
+        setTimeout(()=>{
+          document.getElementById("location-"+key)?.scrollIntoView({
+            behavior:"smooth",
+            block:"center"
+          });
+        },120);
+      }else{
+        msg.textContent="違うようです。";
+        msg.style.color="#8b2733";
+      }
+    });
+  });
+
+  document.querySelectorAll(".trace-keyword").forEach(form=>{
+    form.addEventListener("submit",e=>{
+      e.preventDefault();
+
+      const key=form.dataset.trace;
+      const data=traceData[key];
+      const input=form.querySelector("input");
+      const msg=form.querySelector(".keyword-msg");
+      const value=norm(input.value);
+
+      if(data.keywords.some(k=>norm(k)===value)){
+        PhantomState.update(s=>{s.traces[key]=true;});
+        msg.textContent="TRACE FOUND";
+        msg.style.color="#177245";
+        render();
+
+        const current=PhantomState.load();
+        if(allTraces(current)){
+          setTimeout(()=>{
+            document.getElementById("endingCard")?.scrollIntoView({
+              behavior:"smooth",
+              block:"center"
+            });
+          },150);
+        }
+      }else{
+        msg.textContent="キーワードが一致しません。";
+        msg.style.color="#8b2733";
+      }
+    });
+  });
 }
 
 function render(){
@@ -106,37 +267,18 @@ function render(){
 
   document.getElementById("traceStage").classList.remove("hidden");
 
-  const cards=document.getElementById("traceCards");
-  cards.innerHTML="";
+  renderTraceCards();
 
-  const items=[
-    ["one","TRACE 01","./trace1/"],
-    ["two","TRACE 02","./trace2/"],
-    ["three","TRACE 03","./trace3/"]
-  ];
-
-  let count=0;
-
-  items.forEach(([key,title,href])=>{
-    const ok=!!s.traces[key];
-    if(ok) count++;
-
-    const div=document.createElement("div");
-    div.className="card";
-    div.innerHTML=`
-      <span class="status ${ok?"ok":"lock"}">${ok?"発見済み":"未発見"}</span>
-      <h3>${title}</h3>
-      <p class="muted">家の中のQRから開く想定です。</p>
-      <a class="btn secondary" href="${href}">テスト用に開く</a>
-    `;
-    cards.appendChild(div);
-  });
+  const current=PhantomState.load();
+  const count=["one","two","three"].filter(k=>current.traces[k]).length;
 
   document.getElementById("traceCount").textContent=count;
   document.getElementById("traceBar").style.width=(count/3*100)+"%";
 
-  if(allTraces(s)){
-    PhantomState.update(x=>{x.endingUnlocked=true;});
+  if(allTraces(current)){
+    if(!current.endingUnlocked){
+      PhantomState.update(x=>{x.endingUnlocked=true;});
+    }
     document.getElementById("endingCard").classList.remove("hidden");
   }else{
     document.getElementById("endingCard").classList.add("hidden");
@@ -148,13 +290,20 @@ document.getElementById("squirrelForm").addEventListener("submit",e=>{
 
   const input=document.getElementById("squirrelInput");
   const msg=document.getElementById("squirrelMsg");
-  const value=input.value.trim().replace(/\s/g,"");
+  const value=norm(input.value);
 
   if(value==="リス" || value==="りす"){
     PhantomState.update(s=>{s.squirrelAnswered=true;});
     msg.textContent="正解。";
     msg.style.color="#177245";
-    setTimeout(render,500);
+    render();
+
+    setTimeout(()=>{
+      document.getElementById("findSquirrel")?.scrollIntoView({
+        behavior:"smooth",
+        block:"center"
+      });
+    },120);
   }else{
     msg.textContent="違うようです。";
     msg.style.color="#8b2733";
