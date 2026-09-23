@@ -82,3 +82,33 @@ https://phantom-case-police.github.io/phantom-case/police/chat/?reset=1&build=7
 
 localStorage:
 `phantom_case_master_state_v7`
+
+
+## v8 site prototype
+公開側の警察サイトを企業HPのような構造で試作しました。
+
+通常ナビ：
+- TOP
+- 事件DB
+- 怪盗一覧
+- 捜査情報
+- スタッフ
+
+「セキュアチャット」は通常ナビには表示しません。
+
+ただし、この端末で一度でも警察チャットを開始している場合のみ、
+公開サイト各ページのナビ直下に
+
+「捜査協力セッション進行中」
+［← 捜査チャットに戻る］
+
+という専用導線が表示されます。
+
+これにより一般閲覧時にはチャットの存在を出さず、
+ゲーム進行中だけ相沢へ戻れる設計です。
+
+公開トップ：
+https://phantom-case-police.github.io/phantom-case/police/
+
+ゲーム開始：
+https://phantom-case-police.github.io/phantom-case/police/chat/

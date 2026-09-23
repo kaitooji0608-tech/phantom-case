@@ -3,38 +3,71 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<link rel="stylesheet" href="../../assets/common.css?v=7">
+<link rel="stylesheet" href="../../assets/police-site.css?v=8">
 <title>怪盗関連事件データベース</title>
 </head>
-<body>
-<div class="shell"><div class="panel">
-  <div class="topbar">
-    <div class="kicker">REFERENCE DATABASE</div>
+<body class="police-site">
+
+<header class="police-masthead">
+  <div class="police-masthead-inner">
+    <div class="police-mark">警</div>
+    <div class="police-org">
+      <small>METROPOLITAN SPECIAL INVESTIGATION UNIT</small>
+      <strong>怪盗関連事件特別捜査本部</strong>
+    </div>
+  </div>
+</header>
+<div class="police-nav-wrap">
+  <nav class="police-nav"><a class="" href="../">TOP</a>
+<a class="active" href="../db/">事件DB</a>
+<a class="" href="../suspects/">怪盗一覧</a>
+<a class="" href="../news/">捜査情報</a>
+<a class="" href="../staff/">スタッフ</a></nav>
+</div>
+<div class="session-strip" data-session-return>
+  <div class="session-strip-inner">
+    <div class="session-copy">
+      <strong>捜査協力セッション進行中</strong><br>
+      相沢とのセキュアチャットへ戻れます。
+    </div>
+    <a href="#">← 捜査チャットに戻る</a>
+  </div>
+</div>
+
+<main class="police-main">
+  <div class="page-head">
+    <div class="eyebrow">CASE DATABASE</div>
     <h1>怪盗関連事件データベース</h1>
+    <p>怪盗関連事件の公開記録を検索・参照できます。</p>
   </div>
-  <div class="content">
-    <p class="muted">今回は全体フロー確認用の仮DBです。本番では、ここを探索して3つのKEYに辿り着く想定です。</p>
 
-    <div class="card">
-      <strong>闇① ペーパームーン</strong>
-      <p>テスト用KEY：<span class="code">OP-GOLD</span></p>
-    </div>
-
-    <div class="card">
-      <strong>闇② グリッチ</strong>
-      <p>テスト用KEY：<span class="code">G-404</span></p>
-    </div>
-
-    <div class="card">
-      <strong>闇③ ミルフィーユ</strong>
-      <p>テスト用KEY：<span class="code">MF-POST</span></p>
-    </div>
-
-    <div class="row">
-      <a class="btn" href="../../mystery/">回答ページへ</a>
-      <a class="btn secondary" href="../chat/">警察チャットへ戻る</a>
-    </div>
+  <div class="content-card">
+    <strong>検索</strong>
+    <p style="color:#6b7a89;font-size:12px">現在は全体フロー確認用の仮表示です。検索機能と事件一覧は次の段階で作り込みます。</p>
+    <input style="width:100%;padding:12px;border:1px solid #bdcad5;border-radius:9px" placeholder="事件番号、怪盗名、キーワード">
   </div>
-</div></div>
+
+  <div class="content-card">
+    <small style="color:#7a8e9f">TEST RECORD</small>
+    <h3>ペーパームーン関連記録</h3>
+    <p>テスト用KEY：<code>OP-GOLD</code></p>
+  </div>
+  <div class="content-card">
+    <small style="color:#7a8e9f">TEST RECORD</small>
+    <h3>グリッチ関連記録</h3>
+    <p>テスト用KEY：<code>G-404</code></p>
+  </div>
+  <div class="content-card">
+    <small style="color:#7a8e9f">TEST RECORD</small>
+    <h3>ミルフィーユ関連記録</h3>
+    <p>テスト用KEY：<code>MF-POST</code></p>
+  </div>
+</main>
+
+<footer class="site-footer">
+  怪盗関連事件特別捜査本部｜公開情報ポータル
+</footer>
+<script src="../../assets/police-session.js?v=8"></script>
+
 </body>
 </html>
