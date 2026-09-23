@@ -7,16 +7,18 @@ const startScreen=document.getElementById("startScreen");
 const headerName=document.getElementById("headerName");
 
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
-let eventBusy=false;
+let busy=false;
 
-function getState(){return PhantomState.load();}
+function getState(){ return PhantomState.load(); }
 
 function addMessage(text,sender="police",persist=true){
   const row=document.createElement("div");
   row.className="msg "+sender;
+
   const bubble=document.createElement("div");
   bubble.className="bubble";
   bubble.textContent=text;
+
   row.appendChild(bubble);
   log.appendChild(row);
   log.scrollTop=log.scrollHeight;
@@ -43,25 +45,32 @@ function addSystem(text,persist=true){
 }
 
 async function say(text,sender="police"){
-  await sleep(350);
+  await sleep(320);
   addMessage(text,sender);
-  await sleep(350);
+  await sleep(320);
 }
 
 async function seq(items){
+  busy=true;
   for(const item of items){
     if(typeof item==="string") await say(item,"police");
     else await say(item.text,item.sender||"police");
   }
+  busy=false;
 }
 
-function clearActions(){actions.innerHTML="";}
+function clearActions(){
+  actions.innerHTML="";
+}
 
 function makeButton(label,handler,secondary=false){
   const b=document.createElement("button");
+  b.type="button";
   b.textContent=label;
-  if(secondary)b.className="secondary";
-  b.onclick=handler;
+  if(secondary) b.className="secondary";
+  b.onclick=()=>{
+    if(!busy) handler();
+  };
   actions.appendChild(b);
 }
 
@@ -69,13 +78,14 @@ function makeLink(label,href,secondary=false){
   const a=document.createElement("a");
   a.textContent=label;
   a.href=href;
-  if(secondary)a.className="secondary";
+  if(secondary) a.className="secondary";
   actions.appendChild(a);
 }
 
 function restoreTranscript(){
   log.innerHTML="";
   const s=getState();
+
   s.chat.transcript.forEach(item=>{
     if(item.kind==="sys") addSystem(item.text,false);
     else addMessage(item.text,item.sender,false);
@@ -83,27 +93,55 @@ function restoreTranscript(){
 }
 
 function dateOK(t){
-  const s=t.replace(/[０-９]/g,c=>String.fromCharCode(c.charCodeAt(0)-0xFEE0))
-    .replace(/\s/g,"").replace(/年|月/g,"/").replace(/日/g,"")
-    .replace(/[.\-]/g,"/").replace(/\/+/g,"/");
-  return /(^|\/)2022\/10\/0?2$|^10\/0?2$/.test(s);
+  const s=t
+    .replace(/[０-９]/g,c=>String.fromCharCode(c.charCodeAt(0)-0xFEE0))
+    .replace(/\s/g,"")
+    .replace(/年|月/g,"/")
+    .replace(/日/g,"")
+    .replace(/[.\-]/g,"/")
+    .replace(/\/+/g,"/");
+
+  return /2022\/10\/0?2$|^10\/0?2$/.test(s);
+}
+
+function birthdayDate(t){
+  const s=t
+    .replace(/[０-９]/g,c=>String.fromCharCode(c.charCodeAt(0)-0xFEE0))
+    .replace(/\s/g,"")
+    .replace(/年|月/g,"/")
+    .replace(/日/g,"")
+    .replace(/[.\-]/g,"/")
+    .replace(/\/+/g,"/");
+
+  return /2022\/10\/0?3$|^10\/0?3$/.test(s);
 }
 
 function placeOK(t){
   return /愛媛|松山|道後/.test(t);
 }
 
+function allDarkSolved(s){
+  return s.darkKeys.one && s.darkKeys.two && s.darkKeys.three;
+}
+
+function allTracesSolved(s){
+  return s.traces.one && s.traces.two && s.traces.three;
+}
+
 async function startFresh(){
   await seq([
     "こんにちは。怪盗関連事件特別捜査本部の相沢です。",
-    "過去に怪盗被害に遭われた方へ、順番にご連絡しています。",
-    "まず本人確認をお願いします。",
+    "急に手紙が届いて、びっくりしましたよね。",
+    "現在、過去に怪盗事件の被害に遭われた方へ順番にご連絡しています。",
+    "まず簡単な本人確認だけさせてください。",
     "事件が起きた日付を入力してください。"
   ]);
+
   PhantomState.update(s=>{s.chat.phase="date";});
 }
 
 async function onUserText(t){
+  if(busy) return;
   const s=getState();
   addMessage(t,"user");
 
@@ -111,20 +149,34 @@ async function onUserText(t){
     if(dateOK(t)){
       await say("確認できました。次に、事件が起きた場所を入力してください。");
       PhantomState.update(x=>{x.chat.phase="place";});
+    }else if(birthdayDate(t)){
+      await seq([
+        "惜しいです。",
+        "10月3日は誕生日ですね。",
+        "確認したいのは怪盗事件が起きた日です。"
+      ]);
     }else{
       await say("このQRに紐づく事件記録と一致しません。");
     }
+    renderActions();
     return;
   }
 
   if(s.chat.phase==="place"){
     if(placeOK(t)){
       await seq([
-        "本人確認できました。CASE13「松山誕生日プレゼント盗難事件」の被害者の方ですね。",
-        "出所不明のWebページを確認しています。前回と同じように謎が含まれているようです。",
+        "本人確認できました。",
+        "CASE13「松山誕生日プレゼント盗難事件」の被害者の方ですね。",
+        "現在、出所不明のWebページを確認しています。",
+        "CASE13と同じように謎が含まれているようです。",
         "解析に協力してもらえますか？"
       ]);
-      PhantomState.update(x=>{x.identityVerified=true;x.chat.phase="cooperate";});
+
+      PhantomState.update(x=>{
+        x.identityVerified=true;
+        x.chat.phase="cooperate";
+      });
+
       renderActions();
     }else{
       await say("このQRに紐づく事件記録と一致しません。");
@@ -133,6 +185,7 @@ async function onUserText(t){
   }
 
   await say("ありがとうございます。こちらでも確認します。");
+  renderActions();
 }
 
 async function chooseCooperation(ok){
@@ -144,9 +197,14 @@ async function chooseCooperation(ok){
   if(ok){
     await seq([
       "ありがとうございます。",
-      "問題のページと参考資料DBを共有します。"
+      "問題のページと、参考資料の怪盗関連事件DBを共有します。"
     ]);
-    PhantomState.update(x=>{x.cooperationAccepted=true;x.chat.phase="investigate";});
+
+    PhantomState.update(x=>{
+      x.cooperationAccepted=true;
+      x.chat.phase="investigate";
+    });
+
     renderActions();
     return;
   }
@@ -155,31 +213,52 @@ async function chooseCooperation(ok){
   PhantomState.update(x=>{x.chat.declines=count;});
 
   if(count===1){
-    await seq(["えっ。","協力してくれないんですか？","……冗談ですよね？"]);
+    await seq([
+      "えっ。",
+      "協力してくれないんですか？",
+      "……冗談ですよね？"
+    ]);
     renderActions();
   }else{
-    await seq(["……強いですね。","さすがにお願いします（笑）"]);
+    await seq([
+      "……強いですね。",
+      "さすがにお願いします（笑）"
+    ]);
+
     PhantomState.update(x=>{x.chat.phase="forced";});
     renderActions();
   }
 }
 
-async function handleDarkReport(){
-  if(eventBusy) return;
+async function reportDark(){
   const s=getState();
-  if(s.darkReported) {
-    renderActions();
-    return;
-  }
+  if(!allDarkSolved(s) || s.darkReported) return;
 
-  eventBusy=true;
   clearActions();
-  addMessage("3つの記録を確認しました","user");
+
+  addMessage("謎が解けました","user");
+
+  await seq([
+    "3つともですか？",
+    "どんな内容だったか教えてもらえますか？"
+  ]);
+
+  PhantomState.update(x=>{x.chat.phase="dark-summary";});
+  renderActions();
+}
+
+async function sendDarkSummary(){
+  clearActions();
+
+  addMessage(
+    "警察が怪盗に犯行を依頼した記録、グリッチへの非公式な捜査依頼、ミルフィーユの誤認逮捕に関する記録です。",
+    "user"
+  );
 
   await seq([
     "……これ、本当なんでしょうか。",
     "僕も聞いたことがない内容です。",
-    "こちらで原記録との照合を始めます。"
+    "こちらで原記録と照合します。"
   ]);
 
   addSystem("CONNECTION INTERRUPTED");
@@ -205,48 +284,39 @@ async function handleDarkReport(){
 
   await seq([
     "……戻りました。",
-    "外部接続はこちらでも確認しました。",
+    "チャットへの外部接続はこちらでも確認しました。",
     "先ほどの3件は、こちらで真偽確認を進めます。",
     "怪盗が残した新しいページについては、引き続き確認をお願いします。"
   ]);
 
   PhantomState.update(x=>{x.chat.phase="house-start";});
-  eventBusy=false;
   renderActions();
 }
 
-async function handleSquirrelReport(){
-  if(eventBusy) return;
+async function reportSquirrel(){
   const s=getState();
-  if(s.squirrelReported){
-    renderActions();
-    return;
-  }
+  if(!s.squirrelQrFound || s.squirrelReported) return;
 
-  eventBusy=true;
   clearActions();
-  addMessage("リスのQRを見つけました","user");
+
+  addMessage("QRコードを見つけました","user");
 
   await seq([
-    "確認しました。",
-    "ところで、どうやってこのQRを見つけたんですか？"
+    "QRコードですか？",
+    "どこにあったんですか？"
   ]);
 
-  PhantomState.update(x=>{
-    x.squirrelReported=true;
-    x.chat.phase="squirrel-how";
-  });
-
-  eventBusy=false;
+  PhantomState.update(x=>{x.chat.phase="squirrel-location";});
   renderActions();
 }
 
-async function handleSquirrelHow(){
+async function answerSquirrelLocation(){
   clearActions();
+
   addMessage("家にあるリスの置物についていました","user");
 
   await seq([
-    "……家の中の置物ですか？",
+    "……家の中にある置物ですか？",
     "そのQRは、もともと付いていたものではないですよね？"
   ]);
 
@@ -254,8 +324,9 @@ async function handleSquirrelHow(){
   renderActions();
 }
 
-async function handleSquirrelOriginal(){
+async function answerSquirrelOriginal(){
   clearActions();
+
   addMessage("もともとは付いていません","user");
 
   await seq([
@@ -263,10 +334,11 @@ async function handleSquirrelOriginal(){
     "だとすると、ページを作った人物がご自宅の中に入った可能性があります。",
     "こちらでも確認します。",
     "ページには、まだ3つの痕跡が残されているようです。",
-    "無理のない範囲で、続きの確認をお願いします。"
+    "無理のない範囲で、続きを確認してください。"
   ]);
 
   PhantomState.update(x=>{
+    x.squirrelReported=true;
     x.intrusionConcern=true;
     x.traceSearchUnlocked=true;
     x.chat.phase="trace-search";
@@ -278,6 +350,18 @@ async function handleSquirrelOriginal(){
 function renderActions(){
   clearActions();
   const s=getState();
+
+  // Pending reports get priority over normal page links.
+  if(allDarkSolved(s) && !s.darkReported && s.cooperationAccepted){
+    makeButton("相沢に報告する",reportDark);
+    makeLink("謎ページを確認する","../../mystery/",true);
+    return;
+  }
+
+  if(s.squirrelQrFound && !s.squirrelReported){
+    makeButton("相沢に報告する",reportSquirrel);
+    return;
+  }
 
   if(s.chat.phase==="cooperate"){
     makeButton("捜査に協力する",()=>chooseCooperation(true));
@@ -293,10 +377,11 @@ function renderActions(){
   if(s.chat.phase==="investigate"){
     makeLink("出所不明Webページを開く","../../mystery/");
     makeLink("参考資料DBを開く","../db/",true);
+    return;
+  }
 
-    if(s.darkKeys.one && s.darkKeys.two && s.darkKeys.three && !s.darkReported){
-      makeButton("3つの記録を相沢に報告する",handleDarkReport);
-    }
+  if(s.chat.phase==="dark-summary"){
+    makeButton("3件の内容を共有する",sendDarkSummary);
     return;
   }
 
@@ -305,18 +390,13 @@ function renderActions(){
     return;
   }
 
-  if(s.chat.phase==="squirrel-report"){
-    makeButton("リスのQRを相沢に報告する",handleSquirrelReport);
-    return;
-  }
-
-  if(s.chat.phase==="squirrel-how"){
-    makeButton("家にあるリスの置物についていました",handleSquirrelHow);
+  if(s.chat.phase==="squirrel-location"){
+    makeButton("家にあるリスの置物についていました",answerSquirrelLocation);
     return;
   }
 
   if(s.chat.phase==="squirrel-original"){
-    makeButton("もともとは付いていません",handleSquirrelOriginal);
+    makeButton("もともとは付いていません",answerSquirrelOriginal);
     return;
   }
 
@@ -324,82 +404,41 @@ function renderActions(){
     makeLink("残り3つの痕跡を探す","../../house/");
     return;
   }
-}
 
-async function processIncomingEvent(){
-  const q=new URLSearchParams(location.search);
-  const event=q.get("event");
-  if(!event) return;
-
-  // Remove the query immediately so reload/back doesn't replay it.
-  history.replaceState({}, "", location.pathname);
-
-  if(event==="dark-cleared"){
-    const s=getState();
-    const allDark=s.darkKeys.one && s.darkKeys.two && s.darkKeys.three;
-    if(allDark && !s.darkReported){
-      PhantomState.update(x=>{x.chat.phase="investigate";});
-      await handleDarkReport();
-    }
-    return;
-  }
-
-  if(event==="squirrel-found"){
-    PhantomState.update(x=>{
-      x.squirrelQrFound=true;
-      if(!x.squirrelReported) x.chat.phase="squirrel-report";
-    });
-
-    const s=getState();
-    if(!s.squirrelReported){
-      await handleSquirrelReport();
-    }
+  if(allTracesSolved(s) && s.endingUnlocked && !s.endingComplete){
+    makeLink("最後のページを確認する","../../ending/");
   }
 }
 
-async function enterChat(){
-  startScreen.classList.add("off");
-  await sleep(220);
-
+function boot(){
   const s=getState();
 
   if(s.chat.transcript.length){
+    startScreen.classList.add("off");
     restoreTranscript();
     renderActions();
-    await processIncomingEvent();
   }else{
-    await startFresh();
+    startScreen.addEventListener("click",async()=>{
+      startScreen.classList.add("off");
+      await sleep(220);
+      await startFresh();
+    },{once:true});
   }
 }
 
 composer.addEventListener("submit",e=>{
   e.preventDefault();
   const t=input.value.trim();
-  if(!t) return;
+  if(!t || busy) return;
   input.value="";
   onUserText(t);
 });
 
-// Reset first, before deciding whether this is a revisit.
-if(new URLSearchParams(location.search).get("reset")==="1"){
+const params=new URLSearchParams(location.search);
+if(params.get("reset")==="1"){
   PhantomState.reset();
   history.replaceState({}, "", location.pathname);
 }
 
-// Returning from another page = do NOT show the start screen again.
-const bootState=getState();
-const hasHistory=bootState.chat.transcript.length>0;
-const hasEvent=new URLSearchParams(location.search).has("event");
-
-if(hasHistory || hasEvent){
-  startScreen.classList.add("off");
-  // Run after DOM settles.
-  setTimeout(async()=>{
-    if(getState().chat.transcript.length) restoreTranscript();
-    renderActions();
-    await processIncomingEvent();
-  },80);
-}else{
-  startScreen.addEventListener("click",enterChat);
-}
+boot();
 })();

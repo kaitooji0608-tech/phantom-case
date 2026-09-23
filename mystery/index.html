@@ -1,61 +1,92 @@
 <!doctype html>
 <html lang="ja">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<link rel="stylesheet" href="../assets/common.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="../assets/common.css?v=4">
 <title>出所不明Webページ</title>
 </head>
 <body>
 <div class="shell"><div class="panel">
-<div class="topbar"><div class="kicker">UNKNOWN PAGE</div><h1>3つの記録を確認してください</h1></div>
-<div class="content">
-<p class="muted">テスト版。警察DBを調べて得た3つのKEYを入力する想定です。</p>
+  <div class="topbar">
+    <div class="kicker">UNKNOWN PAGE</div>
+    <h1>3つの記録を確認してください</h1>
+  </div>
 
-<div class="card">
-<span id="st-one" class="status lock">未確認</span>
-<h3>RECORD 01</h3>
-<form data-key="one"><input placeholder="KEYを入力"><div class="answer"></div></form>
-</div>
+  <div class="content">
+    <div id="locked" class="card hidden">
+      <span class="status lock">LOCKED</span>
+      <p>このページはまだ閲覧できません。</p>
+      <a class="btn secondary" href="../police/chat/">警察チャットへ戻る</a>
+    </div>
 
-<div class="card">
-<span id="st-two" class="status lock">未確認</span>
-<h3>RECORD 02</h3>
-<form data-key="two"><input placeholder="KEYを入力"><div class="answer"></div></form>
-</div>
+    <div id="play" class="hidden">
+      <p class="muted">警察DBを調べて得た3つのKEYを入力する想定です。</p>
 
-<div class="card">
-<span id="st-three" class="status lock">未確認</span>
-<h3>RECORD 03</h3>
-<form data-key="three"><input placeholder="KEYを入力"><div class="answer"></div></form>
-</div>
+      <div class="card">
+        <span id="st-one" class="status lock">未確認</span>
+        <h3>RECORD 01</h3>
+        <form data-key="one">
+          <input placeholder="KEYを入力">
+          <div class="answer"></div>
+        </form>
+      </div>
 
-<div id="done" class="card hidden">
-<div class="system">3 RECORDS VERIFIED</div>
-<p>3つ確認できました。相沢に報告してください。</p>
-<a class="btn" href="../police/chat/?event=dark-cleared">相沢に報告してチャットへ戻る</a>
-</div>
+      <div class="card">
+        <span id="st-two" class="status lock">未確認</span>
+        <h3>RECORD 02</h3>
+        <form data-key="two">
+          <input placeholder="KEYを入力">
+          <div class="answer"></div>
+        </form>
+      </div>
 
-<div class="row">
-<a class="btn secondary" href="../police/db/">参考資料DB</a>
-<a class="btn secondary" href="../police/chat/">警察チャット</a>
-</div>
-</div></div></div>
+      <div class="card">
+        <span id="st-three" class="status lock">未確認</span>
+        <h3>RECORD 03</h3>
+        <form data-key="three">
+          <input placeholder="KEYを入力">
+          <div class="answer"></div>
+        </form>
+      </div>
 
-<script src="../assets/state.js?v=3"></script>
+      <div id="done" class="card hidden">
+        <div class="system">3 RECORDS VERIFIED</div>
+        <p>3つの記録を確認しました。</p>
+        <p class="muted">チャットへ戻ると、相沢に報告するためのボタンが表示されます。</p>
+        <a class="btn" href="../police/chat/">警察チャットに戻る</a>
+      </div>
+
+      <div class="row">
+        <a class="btn secondary" href="../police/db/">参考資料DB</a>
+        <a class="btn secondary" href="../police/chat/">警察チャット</a>
+      </div>
+    </div>
+  </div>
+</div></div>
+
+<script src="../assets/state.js?v=4"></script>
 <script>
 const expected={one:"OP-GOLD",two:"G-404",three:"MF-POST"};
 const norm=v=>v.trim().toUpperCase().replace(/\s+/g,"");
 
 function render(){
   const s=PhantomState.load();
+  const allowed=!!s.cooperationAccepted;
+
+  document.getElementById("locked").classList.toggle("hidden",allowed);
+  document.getElementById("play").classList.toggle("hidden",!allowed);
+  if(!allowed) return;
+
   let count=0;
   Object.keys(expected).forEach(k=>{
     const ok=!!s.darkKeys[k];
-    if(ok)count++;
+    if(ok) count++;
     const el=document.getElementById("st-"+k);
     el.textContent=ok?"確認済み":"未確認";
     el.className="status "+(ok?"ok":"lock");
   });
+
   document.getElementById("done").classList.toggle("hidden",count!==3);
 }
 
@@ -65,6 +96,7 @@ document.querySelectorAll("form[data-key]").forEach(form=>{
     const key=form.dataset.key;
     const input=form.querySelector("input");
     const msg=form.querySelector(".answer");
+
     if(norm(input.value)===expected[key]){
       PhantomState.update(s=>{s.darkKeys[key]=true;});
       msg.textContent="正解。";
@@ -76,6 +108,8 @@ document.querySelectorAll("form[data-key]").forEach(form=>{
     }
   });
 });
+
 render();
 </script>
-</body></html>
+</body>
+</html>

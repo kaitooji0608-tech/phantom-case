@@ -1,24 +1,45 @@
 <!doctype html>
 <html lang="ja">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<link rel="stylesheet" href="../../assets/common.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="../../assets/common.css?v=4">
 <title>TRACE 00</title>
 </head>
 <body>
 <div class="shell"><div class="panel">
-<div class="topbar"><div class="kicker">HOUSE TRACE</div><h1>TRACE 00</h1></div>
-<div class="content">
-<div class="card">
-<span class="status ok">FOUND</span>
-<h3>見つけたネ〜😄</h3>
-<p>このQRがここにあること、相沢クンにも教えてあげよう！！</p>
-<a class="btn" href="../../police/chat/?event=squirrel-found">相沢に報告する</a>
-</div>
-</div></div></div>
+  <div class="topbar">
+    <div class="kicker">HOUSE TRACE</div>
+    <h1>TRACE 00</h1>
+  </div>
 
-<script src="../../assets/state.js?v=3"></script>
+  <div class="content">
+    <div id="locked" class="card hidden">
+      <span class="status lock">LOCKED</span>
+      <p>まだこのQRは有効になっていません。</p>
+      <a class="btn secondary" href="../">家謎へ戻る</a>
+    </div>
+
+    <div id="found" class="card hidden">
+      <span class="status ok">FOUND</span>
+      <h3>見つけたネ〜😄</h3>
+      <p>このこと、相沢クンにも教えてあげよう！！</p>
+      <p class="muted">チャットに戻るだけです。会話は自動では始まりません。</p>
+      <a class="btn" href="../../police/chat/">警察チャットに戻る</a>
+    </div>
+  </div>
+</div></div>
+
+<script src="../../assets/state.js?v=4"></script>
 <script>
-PhantomState.update(s=>{s.squirrelQrFound=true;});
+const s=PhantomState.load();
+
+if(!s.squirrelAnswered){
+  document.getElementById("locked").classList.remove("hidden");
+}else{
+  PhantomState.update(x=>{x.squirrelQrFound=true;});
+  document.getElementById("found").classList.remove("hidden");
+}
 </script>
-</body></html>
+</body>
+</html>

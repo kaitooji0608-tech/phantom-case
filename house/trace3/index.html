@@ -1,50 +1,74 @@
 <!doctype html>
 <html lang="ja">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<link rel="stylesheet" href="../../assets/common.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="../../assets/common.css?v=4">
 <title>TRACE 03</title>
 </head>
 <body>
 <div class="shell"><div class="panel">
-<div class="topbar"><div class="kicker">HOUSE TRACE</div><h1>TRACE 03</h1></div>
-<div class="content">
-<div id="locked" class="card hidden"><span class="status lock">LOCKED</span><p>まだ家探索は解放されていません。</p><a class="btn secondary" href="../../police/chat/">警察チャットへ</a></div>
-<div id="play" class="card hidden">
-<p>テスト問題：玄関を開けるのに使うものは？</p>
-<form id="form"><input id="answer" placeholder="答えを入力"><div id="msg" class="answer"></div></form>
-</div>
-<div id="done" class="card hidden">
-<span class="status ok">FOUND</span>
-<p>TRACE 03 を発見しました。</p>
-<a class="btn" href="../">家謎ページへ戻る</a>
-</div>
-</div></div></div>
-<script src="../../assets/state.js?v=3"></script>
+  <div class="topbar">
+    <div class="kicker">HOUSE TRACE</div>
+    <h1>TRACE 03</h1>
+  </div>
+
+  <div class="content">
+    <div id="locked" class="card hidden">
+      <span class="status lock">LOCKED</span>
+      <p>まだ家の探索は解放されていません。</p>
+      <a class="btn secondary" href="../../police/chat/">警察チャットへ</a>
+    </div>
+
+    <div id="play" class="card hidden">
+      <p>テスト問題：玄関を開けるのに使うものは？</p>
+      <form id="form">
+        <input id="answer" placeholder="答えを入力">
+        <div id="msg" class="answer"></div>
+      </form>
+    </div>
+
+    <div id="done" class="card hidden">
+      <span class="status ok">FOUND</span>
+      <p>TRACE 03 を発見しました。</p>
+      <a class="btn" href="../">家謎ページへ戻る</a>
+    </div>
+  </div>
+</div></div>
+
+<script src="../../assets/state.js?v=4"></script>
 <script>
 const accepted=["かぎ", "鍵", "キー"];
 const stateKey="three";
+
 function render(){
- const s=PhantomState.load();
- const unlocked=!!s.traceSearchUnlocked;
- document.getElementById("locked").classList.toggle("hidden",unlocked);
- document.getElementById("play").classList.toggle("hidden",!unlocked || !!s.traces[stateKey]);
- document.getElementById("done").classList.toggle("hidden",!unlocked || !s.traces[stateKey]);
+  const s=PhantomState.load();
+  const unlocked=!!s.traceSearchUnlocked;
+  const solved=!!s.traces[stateKey];
+
+  document.getElementById("locked").classList.toggle("hidden",unlocked);
+  document.getElementById("play").classList.toggle("hidden",!unlocked || solved);
+  document.getElementById("done").classList.toggle("hidden",!unlocked || !solved);
 }
+
 document.getElementById("form").addEventListener("submit",e=>{
- e.preventDefault();
- const v=document.getElementById("answer").value.trim();
- const msg=document.getElementById("msg");
- if(accepted.includes(v)){
-   PhantomState.update(s=>{s.traces[stateKey]=true;});
-   msg.textContent="正解。";
-   msg.style.color="#177245";
-   render();
- }else{
-   msg.textContent="違うようです。";
-   msg.style.color="#8b2733";
- }
+  e.preventDefault();
+
+  const value=document.getElementById("answer").value.trim();
+  const msg=document.getElementById("msg");
+
+  if(accepted.includes(value)){
+    PhantomState.update(s=>{s.traces[stateKey]=true;});
+    msg.textContent="正解。";
+    msg.style.color="#177245";
+    render();
+  }else{
+    msg.textContent="違うようです。";
+    msg.style.color="#8b2733";
+  }
 });
+
 render();
 </script>
-</body></html>
+</body>
+</html>

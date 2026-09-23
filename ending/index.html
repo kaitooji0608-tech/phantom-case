@@ -1,30 +1,91 @@
 <!doctype html>
 <html lang="ja">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<link rel="stylesheet" href="../assets/common.css">
-<title>END</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="../assets/common.css?v=4">
+<title>ENDING</title>
 </head>
 <body>
 <div class="shell"><div class="panel">
-<div class="topbar"><div class="kicker">FINAL</div><h1>ENDING</h1></div>
-<div class="content">
-<div id="locked" class="card hidden">
-<span class="status lock">LOCKED</span>
-<p>まだ3つの痕跡が揃っていません。</p>
-<a class="btn secondary" href="../house/">家謎へ戻る</a>
-</div>
-<div id="end" class="card hidden">
-<div class="system">ALL TRACES FOUND</div>
-<h2>END（仮）</h2>
-<p>ここに最終問題「今回、何を盗んだ？」→「何も盗んでいない」→誕生日サプライズを実装する予定です。</p>
-<p class="muted">今回は全体のページ遷移と状態管理の確認用なので、エンディング演出は仮表示です。</p>
-</div>
-</div></div></div>
-<script src="../assets/state.js?v=3"></script>
+  <div class="topbar">
+    <div class="kicker">FINAL</div>
+    <h1>最後の問題</h1>
+  </div>
+
+  <div class="content">
+    <div id="locked" class="card hidden">
+      <span class="status lock">LOCKED</span>
+      <p>まだ3つの痕跡が揃っていません。</p>
+      <a class="btn secondary" href="../house/">家謎へ戻る</a>
+    </div>
+
+    <div id="question" class="card hidden">
+      <h3>最後の問題</h3>
+      <p>おじさんは今回、この家から何を盗んだでしょう！？</p>
+      <form id="finalForm">
+        <input id="finalInput" placeholder="答えを入力">
+        <div id="finalMsg" class="answer"></div>
+      </form>
+    </div>
+
+    <div id="complete" class="card hidden">
+      <div class="system">CASE COMPLETE</div>
+      <h2>正解〜！！！🎉</h2>
+      <p>今回は何も盗ってませ〜ん😄✋</p>
+      <p>家に入った理由は……<strong>驚かせたかったからデス！！！</strong></p>
+      <p>お誕生日おめでとう！！！🎁🎂</p>
+      <p class="muted">ここは仮エンディングです。本番ではプレゼントへの最後の導線と、おじさんの本番台詞に差し替えます。</p>
+    </div>
+  </div>
+</div></div>
+
+<script src="../assets/state.js?v=4"></script>
 <script>
-const s=PhantomState.load();
-document.getElementById("locked").classList.toggle("hidden",!!s.endingUnlocked);
-document.getElementById("end").classList.toggle("hidden",!s.endingUnlocked);
+function normalize(v){
+  return v.trim().replace(/\s/g,"");
+}
+
+function accepted(v){
+  const n=normalize(v);
+  return [
+    "何も盗んでいない",
+    "なにも盗んでいない",
+    "何も盗んでない",
+    "なにも盗んでない",
+    "何も",
+    "なにも",
+    "何も盗っていない",
+    "なにも盗っていない"
+  ].includes(n);
+}
+
+function render(){
+  const s=PhantomState.load();
+
+  document.getElementById("locked").classList.toggle("hidden",!!s.endingUnlocked);
+  document.getElementById("question").classList.toggle("hidden",!s.endingUnlocked || s.endingComplete);
+  document.getElementById("complete").classList.toggle("hidden",!s.endingComplete);
+}
+
+document.getElementById("finalForm").addEventListener("submit",e=>{
+  e.preventDefault();
+
+  const value=document.getElementById("finalInput").value;
+  const msg=document.getElementById("finalMsg");
+
+  if(accepted(value)){
+    PhantomState.update(s=>{s.endingComplete=true;});
+    msg.textContent="正解。";
+    msg.style.color="#177245";
+    setTimeout(render,400);
+  }else{
+    msg.textContent="違うようです。";
+    msg.style.color="#8b2733";
+  }
+});
+
+render();
 </script>
-</body></html>
+</body>
+</html>

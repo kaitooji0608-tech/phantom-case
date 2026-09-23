@@ -1,6 +1,6 @@
 
 window.PhantomState = (() => {
-  const KEY = "phantom_case_master_state_v2";
+  const KEY = "phantom_case_master_state_v4";
 
   const defaults = {
     identityVerified:false,
@@ -19,6 +19,7 @@ window.PhantomState = (() => {
 
     traces:{one:false,two:false,three:false},
     endingUnlocked:false,
+    endingComplete:false,
 
     chat:{
       phase:"start",
@@ -27,7 +28,9 @@ window.PhantomState = (() => {
     }
   };
 
-  function cloneDefaults(){ return JSON.parse(JSON.stringify(defaults)); }
+  function cloneDefaults(){
+    return JSON.parse(JSON.stringify(defaults));
+  }
 
   function load(){
     try{
@@ -63,5 +66,5 @@ window.PhantomState = (() => {
     return cloneDefaults();
   }
 
-  return {KEY, load, save, update, reset};
+  return {KEY,load,save,update,reset};
 })();

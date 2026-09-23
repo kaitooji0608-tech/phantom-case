@@ -1,26 +1,44 @@
 
 body{background:#dfe7ef}
-.chat-shell{width:min(100%,720px);height:100dvh;max-height:920px;margin:auto;background:#fff;display:grid;grid-template-rows:auto 1fr auto auto;box-shadow:0 12px 38px rgba(16,35,63,.14)}
+.chat-shell{
+  width:min(100%,720px);height:100dvh;max-height:920px;margin:auto;background:#fff;
+  display:grid;grid-template-rows:auto 1fr auto auto;box-shadow:0 12px 38px rgba(16,35,63,.14)
+}
 header{background:#10233f;color:#fff;padding:15px 16px;display:flex;gap:12px;align-items:center}
 header small{display:block;color:#bcd0e5}
 header strong{display:block;margin-top:3px}
-.seal{width:58px;height:58px;border:1px solid rgba(255,255,255,.5);border-radius:50%;display:grid;place-items:center;font-family:serif;font-size:24px}
+.seal{
+  width:58px;height:58px;border:1px solid rgba(255,255,255,.5);border-radius:50%;
+  display:grid;place-items:center;font-family:serif;font-size:24px
+}
 .seal.mini{width:40px;height:40px;font-size:18px}
 .log{overflow:auto;padding:18px 14px;background:#fff}
 .msg{display:flex;margin:0 0 12px}
 .msg.user{justify-content:flex-end}
-.bubble{max-width:80%;padding:10px 12px;border-radius:14px 14px 14px 4px;background:#f0f4f8;border:1px solid #e3e9ef;white-space:pre-wrap;line-height:1.65;font-size:14px}
+.bubble{
+  max-width:80%;padding:10px 12px;border-radius:14px 14px 14px 4px;background:#f0f4f8;
+  border:1px solid #e3e9ef;white-space:pre-wrap;line-height:1.65;font-size:14px
+}
 .user .bubble{background:#d8ecff;border-radius:14px 14px 4px 14px}
 .ojisan .bubble{background:#fff1e7;border-color:#efc8b2}
-.sys{text-align:center;color:#8c2431;font:700 11px ui-monospace,monospace;letter-spacing:.08em;margin:16px 0}
+.sys{
+  text-align:center;color:#8c2431;font:700 11px ui-monospace,monospace;
+  letter-spacing:.08em;margin:16px 0
+}
 .actions{border-top:1px solid #dbe3ec;padding:10px;display:grid;gap:8px}
 .actions:empty{display:none}
-.actions a,.actions button{width:100%;border:0;border-radius:10px;padding:12px;background:#183a64;color:#fff;text-decoration:none;font-weight:700;text-align:center;cursor:pointer}
+.actions a,.actions button{
+  width:100%;border:0;border-radius:10px;padding:12px;background:#183a64;color:#fff;
+  text-decoration:none;font-weight:700;text-align:center;cursor:pointer
+}
 .actions .secondary{background:#fff;color:#183a64;border:1px solid #b9c6d4}
 #composer{display:grid;grid-template-columns:1fr auto;gap:8px;padding:10px;border-top:1px solid #dbe3ec}
 #composer input{border-radius:999px}
 #composer button{border:0;border-radius:999px;background:#1f72b8;color:#fff;padding:10px 16px;font-weight:700}
-.start-screen{position:fixed;inset:0;z-index:10;background:linear-gradient(180deg,#0b1728,#10233f 60%,#0a1626);display:grid;place-items:center;color:#fff;cursor:pointer;transition:.35s}
+.start-screen{
+  position:fixed;inset:0;z-index:10;background:linear-gradient(180deg,#0b1728,#10233f 60%,#0a1626);
+  display:grid;place-items:center;color:#fff;cursor:pointer;transition:.35s
+}
 .start-screen.off{opacity:0;visibility:hidden;pointer-events:none}
 .start-box{text-align:center}
 .start-box .seal{margin:0 auto 20px}
