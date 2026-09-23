@@ -7,9 +7,9 @@ const startScreen=document.getElementById("startScreen");
 const headerName=document.getElementById("headerName");
 
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+let eventBusy=false;
 
 function getState(){return PhantomState.load();}
-function saveState(s){PhantomState.save(s);}
 
 function addMessage(text,sender="police",persist=true){
   const row=document.createElement("div");
@@ -34,6 +34,7 @@ function addSystem(text,persist=true){
   div.textContent=text;
   log.appendChild(div);
   log.scrollTop=log.scrollHeight;
+
   if(persist){
     PhantomState.update(s=>{
       s.chat.transcript.push({kind:"sys",text});
@@ -55,6 +56,7 @@ async function seq(items){
 }
 
 function clearActions(){actions.innerHTML="";}
+
 function makeButton(label,handler,secondary=false){
   const b=document.createElement("button");
   b.textContent=label;
@@ -62,6 +64,7 @@ function makeButton(label,handler,secondary=false){
   b.onclick=handler;
   actions.appendChild(b);
 }
+
 function makeLink(label,href,secondary=false){
   const a=document.createElement("a");
   a.textContent=label;
@@ -71,6 +74,7 @@ function makeLink(label,href,secondary=false){
 }
 
 function restoreTranscript(){
+  log.innerHTML="";
   const s=getState();
   s.chat.transcript.forEach(item=>{
     if(item.kind==="sys") addSystem(item.text,false);
@@ -84,7 +88,10 @@ function dateOK(t){
     .replace(/[.\-]/g,"/").replace(/\/+/g,"/");
   return /(^|\/)2022\/10\/0?2$|^10\/0?2$/.test(s);
 }
-function placeOK(t){return /愛媛|松山|道後/.test(t);}
+
+function placeOK(t){
+  return /愛媛|松山|道後/.test(t);
+}
 
 async function startFresh(){
   await seq([
@@ -158,8 +165,17 @@ async function chooseCooperation(ok){
 }
 
 async function handleDarkReport(){
+  if(eventBusy) return;
+  const s=getState();
+  if(s.darkReported) {
+    renderActions();
+    return;
+  }
+
+  eventBusy=true;
   clearActions();
   addMessage("3つの記録を確認しました","user");
+
   await seq([
     "……これ、本当なんでしょうか。",
     "僕も聞いたことがない内容です。",
@@ -195,10 +211,19 @@ async function handleDarkReport(){
   ]);
 
   PhantomState.update(x=>{x.chat.phase="house-start";});
+  eventBusy=false;
   renderActions();
 }
 
 async function handleSquirrelReport(){
+  if(eventBusy) return;
+  const s=getState();
+  if(s.squirrelReported){
+    renderActions();
+    return;
+  }
+
+  eventBusy=true;
   clearActions();
   addMessage("リスのQRを見つけました","user");
 
@@ -207,17 +232,24 @@ async function handleSquirrelReport(){
     "ところで、どうやってこのQRを見つけたんですか？"
   ]);
 
-  PhantomState.update(x=>{x.squirrelReported=true;x.chat.phase="squirrel-how";});
+  PhantomState.update(x=>{
+    x.squirrelReported=true;
+    x.chat.phase="squirrel-how";
+  });
+
+  eventBusy=false;
   renderActions();
 }
 
 async function handleSquirrelHow(){
   clearActions();
   addMessage("家にあるリスの置物についていました","user");
+
   await seq([
     "……家の中の置物ですか？",
     "そのQRは、もともと付いていたものではないですよね？"
   ]);
+
   PhantomState.update(x=>{x.chat.phase="squirrel-original";});
   renderActions();
 }
@@ -225,6 +257,7 @@ async function handleSquirrelHow(){
 async function handleSquirrelOriginal(){
   clearActions();
   addMessage("もともとは付いていません","user");
+
   await seq([
     "分かりました。",
     "だとすると、ページを作った人物がご自宅の中に入った可能性があります。",
@@ -232,11 +265,13 @@ async function handleSquirrelOriginal(){
     "ページには、まだ3つの痕跡が残されているようです。",
     "無理のない範囲で、続きの確認をお願いします。"
   ]);
+
   PhantomState.update(x=>{
     x.intrusionConcern=true;
     x.traceSearchUnlocked=true;
     x.chat.phase="trace-search";
   });
+
   renderActions();
 }
 
@@ -249,86 +284,122 @@ function renderActions(){
     makeButton("今回は協力しない",()=>chooseCooperation(false),true);
     return;
   }
+
   if(s.chat.phase==="forced"){
     makeButton("捜査に協力する",()=>chooseCooperation(true));
     return;
   }
+
   if(s.chat.phase==="investigate"){
     makeLink("出所不明Webページを開く","../../mystery/");
     makeLink("参考資料DBを開く","../db/",true);
+
     if(s.darkKeys.one && s.darkKeys.two && s.darkKeys.three && !s.darkReported){
       makeButton("3つの記録を相沢に報告する",handleDarkReport);
     }
     return;
   }
+
   if(s.chat.phase==="house-start"){
     makeLink("怪盗が残した新しい謎ページ","../../house/");
     return;
   }
+
   if(s.chat.phase==="squirrel-report"){
     makeButton("リスのQRを相沢に報告する",handleSquirrelReport);
     return;
   }
+
   if(s.chat.phase==="squirrel-how"){
     makeButton("家にあるリスの置物についていました",handleSquirrelHow);
     return;
   }
+
   if(s.chat.phase==="squirrel-original"){
     makeButton("もともとは付いていません",handleSquirrelOriginal);
     return;
   }
+
   if(s.chat.phase==="trace-search"){
     makeLink("残り3つの痕跡を探す","../../house/");
     return;
   }
 }
 
-function applyIncomingEvent(){
+async function processIncomingEvent(){
   const q=new URLSearchParams(location.search);
   const event=q.get("event");
-  if(!event)return;
+  if(!event) return;
+
+  // Remove the query immediately so reload/back doesn't replay it.
+  history.replaceState({}, "", location.pathname);
 
   if(event==="dark-cleared"){
-    PhantomState.update(s=>{
-      if(!s.darkReported) s.chat.phase="investigate";
-    });
+    const s=getState();
+    const allDark=s.darkKeys.one && s.darkKeys.two && s.darkKeys.three;
+    if(allDark && !s.darkReported){
+      PhantomState.update(x=>{x.chat.phase="investigate";});
+      await handleDarkReport();
+    }
+    return;
   }
 
   if(event==="squirrel-found"){
-    PhantomState.update(s=>{
-      s.squirrelQrFound=true;
-      if(!s.intrusionConcern) s.chat.phase="squirrel-report";
+    PhantomState.update(x=>{
+      x.squirrelQrFound=true;
+      if(!x.squirrelReported) x.chat.phase="squirrel-report";
     });
-  }
 
-  history.replaceState({}, "", location.pathname);
+    const s=getState();
+    if(!s.squirrelReported){
+      await handleSquirrelReport();
+    }
+  }
 }
 
+async function enterChat(){
+  startScreen.classList.add("off");
+  await sleep(220);
+
+  const s=getState();
+
+  if(s.chat.transcript.length){
+    restoreTranscript();
+    renderActions();
+    await processIncomingEvent();
+  }else{
+    await startFresh();
+  }
+}
+
+composer.addEventListener("submit",e=>{
+  e.preventDefault();
+  const t=input.value.trim();
+  if(!t) return;
+  input.value="";
+  onUserText(t);
+});
+
+// Reset first, before deciding whether this is a revisit.
 if(new URLSearchParams(location.search).get("reset")==="1"){
   PhantomState.reset();
   history.replaceState({}, "", location.pathname);
 }
 
-applyIncomingEvent();
+// Returning from another page = do NOT show the start screen again.
+const bootState=getState();
+const hasHistory=bootState.chat.transcript.length>0;
+const hasEvent=new URLSearchParams(location.search).has("event");
 
-startScreen.addEventListener("click",async()=>{
+if(hasHistory || hasEvent){
   startScreen.classList.add("off");
-  await sleep(250);
-
-  const s=getState();
-  if(s.chat.transcript.length){
-    restoreTranscript();
+  // Run after DOM settles.
+  setTimeout(async()=>{
+    if(getState().chat.transcript.length) restoreTranscript();
     renderActions();
-  }else{
-    await startFresh();
-  }
-});
-
-composer.addEventListener("submit",e=>{
-  e.preventDefault();
-  const t=input.value.trim();
-  if(!t)return;
-  input.value="";
-  onUserText(t);
-});
+    await processIncomingEvent();
+  },80);
+}else{
+  startScreen.addEventListener("click",enterChat);
+}
 })();
