@@ -120,3 +120,29 @@ https://phantom-case-police.github.io/phantom-case/police/chat/
 - Added /police/about/, /police/message/, /police/contact/, /police/search/.
 - Added generated fictional institutional-building hero image.
 - Secure chat is still hidden from normal global navigation. During an active chat session, only the session-return strip appears.
+
+
+## v10
+トップページのメインビジュアルを変更しました。
+
+- ヨーロッパ風の重厚な庁舎画像へ変更
+- 国旗なし
+- メインコピー：
+  「正義は、見えないところで支えられている。」
+- サブコピー：
+  「怪盗関連事件の真相解明に向け、特別捜査本部は継続的な情報収集と分析を行っています。」
+- 文字は画像へ焼き込まずHTML/CSSで重ねているため、スマホでも崩れにくい構成です。
+
+
+## v11 DB prototype
+事件DBの情報設計確認用として3件を実装。
+
+- CASE22 怪盗カタッポ：通常事件
+- CASE24 怪盗グリッチ：公開CASE＋検索資料＋非公開資料
+- CASE23 怪盗ペーパームーン：公開CASE＋非公開作戦資料
+
+CASE本文とRELATED DOCUMENTSを別ページに分離しています。
+開発中のみ各記録へ「DEV：公開」「DEV：検索」「DEV：非公開」を表示しています。
+
+検索インデックスにも各CASE・DOCUMENTを登録済みです。
+現段階では内部資料も動作確認のため検索対象に含めています。後で公開範囲を整理します。
