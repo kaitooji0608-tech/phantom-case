@@ -351,18 +351,45 @@ function renderActions(){
   clearActions();
   const s=getState();
 
-  // Pending reports get priority over normal page links.
-  if(allDarkSolved(s) && !s.darkReported && s.cooperationAccepted){
+  // 会話の途中は、その会話フェーズを最優先する。
+  if(s.chat.phase==="dark-summary"){
+    makeButton("3件の内容を共有する",sendDarkSummary);
+    return;
+  }
+
+  if(s.chat.phase==="squirrel-location"){
+    makeButton("家にあるリスの置物についていました",answerSquirrelLocation);
+    return;
+  }
+
+  if(s.chat.phase==="squirrel-original"){
+    makeButton("もともとは付いていません",answerSquirrelOriginal);
+    return;
+  }
+
+  // 別ページで新しい事実を見つけ、まだ警察へ報告していない場合。
+  if(
+    s.chat.phase==="investigate" &&
+    allDarkSolved(s) &&
+    !s.darkReported &&
+    s.cooperationAccepted
+  ){
     makeButton("相沢に報告する",reportDark);
     makeLink("謎ページを確認する","../../mystery/",true);
     return;
   }
 
-  if(s.squirrelQrFound && !s.squirrelReported){
+  if(
+    s.chat.phase==="house-start" &&
+    s.squirrelQrFound &&
+    !s.squirrelReported
+  ){
     makeButton("相沢に報告する",reportSquirrel);
+    makeLink("怪盗が残した新しい謎ページ","../../house/",true);
     return;
   }
 
+  // 通常フェーズ。
   if(s.chat.phase==="cooperate"){
     makeButton("捜査に協力する",()=>chooseCooperation(true));
     makeButton("今回は協力しない",()=>chooseCooperation(false),true);
@@ -380,23 +407,8 @@ function renderActions(){
     return;
   }
 
-  if(s.chat.phase==="dark-summary"){
-    makeButton("3件の内容を共有する",sendDarkSummary);
-    return;
-  }
-
   if(s.chat.phase==="house-start"){
     makeLink("怪盗が残した新しい謎ページ","../../house/");
-    return;
-  }
-
-  if(s.chat.phase==="squirrel-location"){
-    makeButton("家にあるリスの置物についていました",answerSquirrelLocation);
-    return;
-  }
-
-  if(s.chat.phase==="squirrel-original"){
-    makeButton("もともとは付いていません",answerSquirrelOriginal);
     return;
   }
 
