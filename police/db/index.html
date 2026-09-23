@@ -1,49 +1,16 @@
-<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="../../assets/police-site.css?v=11"><title>怪盗関連事件データベース</title></head><body class="police-site"><header class="site-head"><div class="site-head-inner">
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="../../assets/police-site.css?v=12"><title>事件データベース</title></head><body class="police-site">
+<div class="dev-ribbon"><div class="dev-ribbon-inner"><span>DEV BUILD v12：確認用表示（本番ではDEV表示を削除）</span><a href="../dev/">開発確認インデックス</a></div></div>
+<header class="site-head"><div class="site-head-inner">
 <a class="brand" href="../"><div class="brand-mark">警</div><div class="brand-copy"><small>SPECIAL INVESTIGATION HEADQUARTERS</small><strong>怪盗関連事件特別捜査本部</strong><em>怪盗関連事件の真相解明と被害防止のために</em></div></a>
-<form class="global-search" action="../search/" method="get"><input name="q" placeholder="検索キーワードを入力してください"><button type="submit">🔍 検索</button></form>
+<form class="global-search" action="../search/" method="get"><input name="q" placeholder="サイト内を検索"><button type="submit">検索</button></form>
 </div></header>
 <div class="global-nav-wrap"><nav class="global-nav"><a class="" href="../about/">本部について</a><a class="" href="../message/">本部長挨拶</a><a class="active" href="../db/">事件データベース</a><a class="" href="../suspects/">怪盗一覧</a><a class="" href="../news/">捜査情報</a><a class="" href="../staff/">スタッフ</a><a class="" href="../contact/">情報提供</a></nav></div>
 <div class="session-strip" data-session-return><div class="session-strip-inner"><div class="session-copy"><strong>捜査協力セッション進行中</strong><br>相沢とのセキュアチャットへ戻れます。</div><a href="#">← 捜査チャットに戻る</a></div></div>
-<main class="site-main">
-  <div class="page-head">
-    <small>CASE DATABASE</small>
-    <h1>怪盗関連事件データベース</h1>
-    <p>怪盗関連事件の基本記録を参照できます。人物名・文書番号などを含む横断検索は、ページ上部のサイト内検索をご利用ください。</p>
-  </div>
-
-  <div class="dev-note-box">
-    <strong>開発確認用表示</strong><br>
-    現在は情報設計を確認するため、本番では表に出さない分類ラベルや内部資料への導線も表示しています。
-  </div>
-
-  <div class="db-toolbar">
-    <p>まず3件だけ実データに近い形で試作しています。CASE本文と関連文書を分けて確認できます。</p>
-    <div class="dev-legend">
-      <span class="dev-badge dev-public">DEV：公開</span>
-      <span class="dev-badge dev-search">DEV：検索</span>
-      <span class="dev-badge dev-private">DEV：非公開</span>
-    </div>
-  </div>
-
-  <section class="case-list">
-    <a class="case-record" href="./case22/">
-      <div><div class="case-code">CASE22</div><div class="case-date">2024.11–2025.01</div></div>
-      <div><h2>片割れ連続窃盗事件</h2><p>対になっている物品の片方のみが盗まれた連続窃盗事件。怪盗カタッポを逮捕し、関連8件を送致。</p></div>
-      <div><span class="dev-badge dev-public">DEV：公開</span><div class="case-status closed" style="margin-top:8px">CLOSED</div></div>
-    </a>
-
-    <a class="case-record" href="./case24/">
-      <div><div class="case-code">CASE24</div><div class="case-date">2025.04.12</div></div>
-      <div><h2>都内企業システム侵入事件</h2><p>企業ネットワークへの不正侵入・情報窃取事件。怪盗グリッチを逮捕し、本件は終結扱い。</p></div>
-      <div><span class="dev-badge dev-public">DEV：公開</span><div class="case-status closed" style="margin-top:8px">CLOSED</div></div>
-    </a>
-
-    <a class="case-record" href="./case23/">
-      <div><div class="case-code">CASE23</div><div class="case-date">2025.02.15</div></div>
-      <div><h2>白金資産家宅貴金属盗難事件</h2><p>港区白金の個人宅から宝飾品・貴金属類が盗難。怪盗ペーパームーン関連事件として現在も記録上は未解決。</p></div>
-      <div><span class="dev-badge dev-public">DEV：公開</span><div class="case-status open" style="margin-top:8px">UNRESOLVED</div></div>
-    </a>
-  </section>
-</main>
-<footer class="site-footer"><div class="footer-inner"><div class="footer-links"><a href="../about/">本部について</a><a href="../contact/">情報提供</a><a href="../search/">サイト内検索</a></div><div>© 2026 怪盗関連事件特別捜査本部</div></div></footer>
-<script src="../../assets/police-session.js?v=11"></script></body></html>
+<main class="site-main"><div class="page-head"><small>CASE DATABASE</small><h1>怪盗関連事件データベース</h1><p>公開対象となっている怪盗関連事件の基本記録を参照できます。人物名・文書番号・特徴的な文言は上部のサイト内検索から横断検索できます。</p></div>
+<div class="db-toolbar"><p>事件記録はCASE単位で整理し、個別の報告書・証拠記録はRELATED DOCUMENTSとして分離しています。</p><div class="filters"><span class="filter-chip">全11件</span><span class="filter-chip">解決済み</span><span class="filter-chip">未解決</span></div></div><section class="case-list"><a class="case-record" href="./case13/"><div><div class="case-code">CASE13</div><div class="case-date">2022年10月2日</div></div><div><h2>松山誕生日プレゼント盗難事件</h2><p>宿泊先周辺で誕生日プレゼントが一時的に持ち去られ、複数の謎解きと引き換えに所在が示された事件。被害品は最終的に確認されたが、実行者の身柄確保には至っていない。</p></div><div><div class="case-status open">INVESTIGATION CONTINUES</div></div></a><a class="case-record" href="./case16/"><div><div class="case-code">CASE16</div><div class="case-date">2025年5月11日〜5月30日</div></div><div><h2>菓子文化資料館連続盗難事件</h2><p>菓子文化資料館等で展示・収蔵品が複数回持ち出された事件。各現場に特徴的な予告文が残され、怪盗ミルフィーユ関連事件として捜査。2025年5月30日に被疑者を逮捕し、公開記録上は解決済み。</p></div><div><div class="case-status closed">CLOSED</div></div></a><a class="case-record" href="./case17/"><div><div class="case-code">CASE17</div><div class="case-date">2024年8月19日</div></div><div><h2>夜間楽器収蔵庫侵入事件</h2><p>夜間、私設音楽資料館の収蔵庫に侵入され、19世紀の楽譜1点が持ち出された。窓や扉に大きな破壊痕はなく、夜間帯に限定した行動傾向から怪盗ノクターン関連として記録。</p></div><div><div class="case-status open">UNRESOLVED</div></div></a><a class="case-record" href="./case18/"><div><div class="case-code">CASE18</div><div class="case-date">2024年9月7日</div></div><div><h2>高層施設屋上設備侵入事件</h2><p>高層施設の屋上散水設備へ無断侵入し、建物正面に一時的な水幕を発生させた事件。人的被害はなく、設備復旧後に本件を終結扱いとした。</p></div><div><div class="case-status closed">CLOSED</div></div></a><a class="case-record" href="./case19/"><div><div class="case-code">CASE19</div><div class="case-date">2024年10月12日</div></div><div><h2>物流倉庫一時侵入事件</h2><p>物流倉庫へ第三者が侵入し、保管箱の配置が大規模に変更された事件。高額品の盗難は確認されなかったが、白い兎を模したカードが残されていた。</p></div><div><div class="case-status open">UNRESOLVED</div></div></a><a class="case-record" href="./case20/"><div><div class="case-code">CASE20</div><div class="case-date">2024年11月2日</div></div><div><h2>会員制展示会装飾品盗難事件</h2><p>招待制展示会で装飾用ブローチ2点が盗まれた事件。現場には怪盗名義のカードが残されていたが、犯行動機・侵入方法ともに未確定。</p></div><div><div class="case-status open">UNRESOLVED</div></div></a><a class="case-record" href="./case21/"><div><div class="case-code">CASE21</div><div class="case-date">2024年11月16日</div></div><div><h2>展示箱無断開封事件</h2><p>展示室内の施錠展示箱が無断で開封されていた事件。収蔵物の欠落はなく、施設側の運用上の不備も確認されたため、怪盗関連性は低いとして終結。</p></div><div><div class="case-status closed">CLOSED</div></div></a><a class="case-record" href="./case22/"><div><div class="case-code">CASE22</div><div class="case-date">2024年11月〜2025年1月</div></div><div><h2>片割れ連続窃盗事件</h2><p>都内の住宅・店舗で、対になっている物品の片方だけが盗まれた連続窃盗事件。各現場には「片方だけ、いただきます。」と記載されたカードが残された。</p></div><div><div class="case-status closed">CLOSED</div></div></a><a class="case-record" href="./case23/"><div><div class="case-code">CASE23</div><div class="case-date">2025年2月15日</div></div><div><h2>本部展示美術品盗難事件</h2><p>本部応接スペースに展示されていた一点物の絵画が夜間に持ち出された事件。現場に怪盗ペーパームーンの過去資料と類似する予告状が残されており、関連事件として捜査中。</p></div><div><div class="case-status open">UNRESOLVED</div></div></a><a class="case-record" href="./case24/"><div><div class="case-code">CASE24</div><div class="case-date">2025年4月12日</div></div><div><h2>都内企業システム侵入事件</h2><p>都内企業の社内ネットワークへ第三者が侵入し、複数の内部ファイルが不正取得された。アクセスログと過去事案の照合から怪盗グリッチによる犯行と判断し、2025年4月19日に対象者を確保した。</p></div><div><div class="case-status closed">CLOSED</div></div></a><a class="case-record" href="./case25/"><div><div class="case-code">CASE25</div><div class="case-date">2025年6月14日</div></div><div><h2>旧洋館収蔵品持出事件</h2><p>公開準備中の旧洋館資料室から銀製の装飾皿1点が持ち出された事件。現場には短い文面のカードが残されていたが、関連怪盗は特定されていない。</p></div><div><div class="case-status open">UNRESOLVED</div></div></a></section></main>
+<footer class="site-footer"><div class="footer-inner">
+<div class="footer-links"><a href="../about/">本部について</a><a href="../contact/">情報提供</a><a href="../system/">サイト運用情報</a><a href="../search/">サイト内検索</a></div>
+<div>© 2026 怪盗関連事件特別捜査本部</div></div></footer>
+<script src="../../assets/police-session.js?v=12"></script>
+<script src="../../assets/image-lightbox.js?v=12"></script>
+</body></html>
