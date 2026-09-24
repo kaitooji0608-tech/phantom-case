@@ -21,10 +21,14 @@
   let log=[];
   let busy=false;
 
-  // チャットの体感速度。
-  // 1.0 = 以前の速度 / 1.8 = 現在の設定
-  // 後でさらに遅く・速くしたい場合はこの数値だけ調整できます。
-  const CHAT_PACE=1.8;
+  // 相沢の連続メッセージは「前の文を読む時間 + 3秒」で次を表示。
+  // 読書速度は約600文字/分（10文字/秒）を基準にしています。
+  const READING_CHARS_PER_SEC=10;
+  const EXTRA_PAUSE_MS=3000;
+  const MIN_CHAT_DELAY_MS=4000;
+  const MAX_CHAT_DELAY_MS=15000;
+  let lastReadableChars=0;
+  let lastRole=null;
 
   const qs=new URLSearchParams(location.search);
 
@@ -121,6 +125,22 @@
 
   function addMessage(html,role='aizawa'){
     renderItem({role,html,time:now()},true);
+
+    const plain=String(html)
+      .replace(/<[^>]+>/g,'')
+      .replace(/&nbsp;/g,' ')
+      .replace(/&amp;/g,'&')
+      .replace(/&lt;/g,'<')
+      .replace(/&gt;/g,'>')
+      .trim();
+
+    if(role==='aizawa' || role==='ojisan'){
+      lastReadableChars=plain.length;
+      lastRole=role;
+    }else{
+      lastReadableChars=0;
+      lastRole=role;
+    }
   }
 
   function addUser(text){
@@ -155,18 +175,31 @@
     return new Promise(r=>setTimeout(r,ms));
   }
 
-  function typingTime(html,min=780,max=2200){
-    const plain=html.replace(/<[^>]+>/g,'');
-    return Math.max(min,Math.min(max,520+plain.length*24));
+  function readingDelay(){
+    // 連続する相沢／おじさんの発言では、
+    // 直前の吹き出しを読む時間に3秒を足す。
+    if(lastRole==='aizawa' || lastRole==='ojisan'){
+      const readingMs=(lastReadableChars/READING_CHARS_PER_SEC)*1000;
+      return Math.max(
+        MIN_CHAT_DELAY_MS,
+        Math.min(MAX_CHAT_DELAY_MS,Math.round(readingMs+EXTRA_PAUSE_MS))
+      );
+    }
+
+    // ユーザーが送信した直後などは、最低4秒は「入力中」を見せる。
+    return MIN_CHAT_DELAY_MS;
   }
 
   async function later(html,delay=null,role='aizawa'){
     showTyping(role);
 
-    const baseDelay=delay===null?typingTime(html):delay;
-    const pacedDelay=Math.round(baseDelay*CHAT_PACE);
+    // 個別指定のdelayも最低4秒を下回らないようにし、
+    // 通常は「前の文を読む時間 + 3秒」を使用する。
+    const waitMs=delay===null
+      ? readingDelay()
+      : Math.max(MIN_CHAT_DELAY_MS,delay);
 
-    await wait(pacedDelay);
+    await wait(waitMs);
 
     clearTyping();
     addMessage(html,role);
