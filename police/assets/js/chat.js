@@ -5,13 +5,26 @@ const A=document.getElementById('chat-actions');
 const F=document.getElementById('chat-form');
 const I=document.getElementById('chat-input');
 
-const STATE_KEY='phantomPoliceMainChatV3State';
-const DECLINE_KEY='phantomPoliceMainChatV3Declines';
+const STATE_KEY='phantomPoliceMainChatV4State';
+const DECLINE_KEY='phantomPoliceMainChatV4Declines';
 
 let state=localStorage.getItem(STATE_KEY)||'start';
 let declineCount=parseInt(localStorage.getItem(DECLINE_KEY)||'0',10)||0;
 const qs=new URLSearchParams(location.search);
 let busy=false;
+
+const uiStyle=document.createElement('style');
+uiStyle.textContent=`
+  .chat-page .chat-actions{
+    justify-content:flex-end !important;
+    text-align:right;
+  }
+  .chat-page .ai-suggest-label{
+    width:100%;
+    text-align:right;
+  }
+`;
+document.head.appendChild(uiStyle);
 
 function save(s){
   state=s;
@@ -64,7 +77,12 @@ function actions(items){
     b.type='button';
     b.className='suggest'+(primary?' primary':'');
     b.textContent=label;
-    b.onclick=()=>{if(!busy)fn();};
+    b.onclick=()=>{
+      if(busy)return;
+      userMsg(label);
+      clearActions();
+      fn();
+    };
     A.appendChild(b);
   });
 }
@@ -118,7 +136,7 @@ async function intro(){
   await later('こんにちは。<br>怪盗関連事件特別捜査本部の相沢です。',700);
 
   await later(
-    '今回はこちらから突然ご連絡する形になってしまい、すみません。'
+    'こちらから突然ご連絡する形になってしまい、すみません。急に手紙が届いて驚きましたよね。'
   );
 
   await later(
@@ -161,7 +179,7 @@ async function verified(){
   await later('ありがとうございます。',800);
   await later('本人確認が取れました。');
   await later(
-    '2022年10月2日、<strong>愛媛県松山市の道後温泉</strong>で発生した事件ですね。'
+    '2022年10月2日、愛媛県松山市の道後温泉で発生した事件ですね。'
   );
 
   await later(
@@ -169,7 +187,7 @@ async function verified(){
   );
 
   await later(
-    '実はつい最近、<strong>怪盗関連事件特別捜査本部宛てに、送信元の分からないURL</strong>が届きました。'
+    '実はつい最近、怪盗関連事件特別捜査本部宛てに、送信元の分からないURLが届きました。'
   );
 
   await later(
@@ -197,7 +215,7 @@ async function verified(){
   );
 
   await later(
-    'こちらからお渡しする資料を確認して、<strong>何か気づいたことがあれば教えていただきたい</strong>、というお願いです。'
+    'こちらからお渡しする資料を確認して、何か気づいたことがあれば教えていただきたい、というお願いです。'
   );
 
   await later(
@@ -273,7 +291,7 @@ async function cooperate(){
     'それでは、今回発見された不審なURLを共有させていただきます。'
   );
 
-  msg(rawLink(suspicious),'system');
+  msg(rawLink(suspicious));
 
   await later(
     '現時点では、危険なプログラムなどは確認されていませんので、そのまま開いていただいて大丈夫です。'
@@ -283,7 +301,7 @@ async function cooperate(){
     'あと、何かの手がかりになるかもしれないので、怪盗に関する情報のデータベースもお渡ししておきます。'
   );
 
-  msg(rawLink(db),'system');
+  msg(rawLink(db));
 
   await later(
     '過去の事件や怪盗に関する情報が入っています。気になる言葉や番号があれば、こちらも確認してみてください。'
@@ -297,7 +315,7 @@ async function cooperate(){
     '今回お送りしたデータベースも、このサイトの一部です。'
   );
 
-  msg(rawLink(hp),'system');
+  msg(rawLink(hp));
 
   await later(
     '何か分からない点や、気になることがあれば、このチャットでお気軽に聞いてください！'
@@ -354,7 +372,7 @@ async function report(){
   );
 
   await later(
-    '次はパソコンばっかり見てないで、<strong>お家の中</strong>を使って遊ぼっか🏠✨',
+    '次はパソコンばっかり見てないで、お家の中を使って遊ぼっか🏠✨',
     1800,
     'ojisan'
   );
@@ -382,11 +400,11 @@ async function squirrel(){
   );
 
   await later(
-    'もし、その指示をたどって<strong>実際にご自宅の中で何かを見つけた</strong>のであれば……'
+    'もし、その指示をたどって実際にご自宅の中で何かを見つけたのであれば……'
   );
 
   await later(
-    '<strong>誰かが、あなたの家の中に入った可能性があります。</strong>',
+    '誰かが、あなたの家の中に入った可能性があります。',
     1900
   );
 
@@ -466,7 +484,7 @@ F.onsubmit=async e=>{
 
     if(isBirthday(v)){
       await later(
-        '惜しいです。<strong>10月3日ではなく、その前日</strong>に起きた事件です。怪盗による被害が確認された日を思い出してみてください。',
+        '惜しいです。10月3日ではなく、その前日に起きた事件です。怪盗による被害が確認された日を思い出してみてください。',
         850
       );
       busy=false;
@@ -542,14 +560,14 @@ function restore(){
 
   if(state==='verifyDate'){
     msg(
-      '本人確認を続けます。以前、怪盗による被害に遭われた<strong>日付</strong>を教えてください。'
+      '本人確認を続けます。以前、怪盗による被害に遭われた日付を教えてください。'
     );
     return;
   }
 
   if(state==='verifyPlace'){
     msg(
-      '日付は確認済みです。事件があった<strong>場所</strong>を教えてください。'
+      '日付は確認済みです。事件があった場所を教えてください。'
     );
     return;
   }
@@ -583,9 +601,9 @@ function restore(){
     );
 
     const root=policeRoot();
-    msg(rawLink(root+'puzzle/'),'system');
-    msg(rawLink(root+'db/'),'system');
-    msg(rawLink(root),'system');
+    msg(rawLink(root+'puzzle/'));
+    msg(rawLink(root+'db/'));
+    msg(rawLink(root));
 
     if(localStorage.getItem('phantomPolicePuzzleComplete')==='1'){
       actions([
