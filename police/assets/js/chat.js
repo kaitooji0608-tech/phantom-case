@@ -10,9 +10,9 @@
   const STATUS_TEXT=document.getElementById('connect-status-text');
   const PROGRESS=document.getElementById('connect-progress-bar');
 
-  const STATE_KEY='phantomPoliceMainChatV6State';
-  const DECLINE_KEY='phantomPoliceMainChatV6Declines';
-  const LOG_KEY='phantomPoliceMainChatV6Log';
+  const STATE_KEY='phantomPoliceMainChatV7State';
+  const DECLINE_KEY='phantomPoliceMainChatV7Declines';
+  const LOG_KEY='phantomPoliceMainChatV7Log';
   const INTRO_KEY='phantomSecureChatIntroSeenV1';
 
   let state=localStorage.getItem(STATE_KEY)||'start';
@@ -22,6 +22,8 @@
 
   // 相沢の連続メッセージは「前の文を読む時間 + 2秒」で次を表示。
   // 読書速度は約600文字/分（10文字/秒）を基準にしています。
+  // 本番用基本ディレイ: 10文字/秒 + 2秒 / 最低3秒 / 最大14秒 / URL送信2秒
+  const DEBUG_NO_DELAY=true;
   const READING_CHARS_PER_SEC=10;
   const EXTRA_PAUSE_MS=2000;
   const MIN_CHAT_DELAY_MS=3000;
@@ -256,7 +258,7 @@
   function namedLink(url,label){
     const safeURL=escapeHTML(url);
     const safeLabel=escapeHTML(label);
-    return '<a href="'+safeURL+'">'+safeLabel+'</a>';
+    return '<a href="'+safeURL+'" target="_blank" rel="noopener noreferrer">'+safeLabel+'</a>';
   }
 
   function normalize(v){
@@ -406,7 +408,7 @@
     await later('はい、ありがとうございます。',700);
     await later('助かります。');
 
-    await later('それでは、今回発見された不審なURLを共有させていただきます。');
+    await later('それでは、今回発見された不審なページを共有します。');
     showTyping();
     await wait(2000);
     clearTyping();
@@ -414,16 +416,8 @@
 
     await later('現時点では、危険なプログラムなどは確認されていませんので、そのまま開いていただいて大丈夫です。');
 
-    await later('あと、何かの手がかりになるかもしれないので、怪盗に関する情報のデータベースもお渡ししておきます。');
-    showTyping();
-    await wait(2000);
-    clearTyping();
-    addMessage(namedLink(policeRoot()+'db/','怪盗関連事件データベース'));
-
-    await later('過去の事件や怪盗に関する情報が入っています。こちらも確認してみてください。');
-
-    await later('それと、捜査協力をお願いする方には、本部の概要や公開可能な資料をご確認いただけるよう、準備公開版のホームページもあわせてご案内する運用になっています。');
-    await later('今回お送りしたデータベースも、このサイトの一部です。');
+    await later('あわせて、参考資料として怪盗関連事件特別捜査本部のホームページもお送りします。');
+    await later('過去の事件や怪盗に関する情報は、サイト内の「事件・怪盗DB」から確認できます。こちらも必要に応じて確認してみてください。');
     showTyping();
     await wait(2000);
     clearTyping();
@@ -433,8 +427,9 @@
 
     await later('あ、最後に1点だけ注意点です。');
     await later('このチャットは、セキュリティの関係で初回に接続した端末情報と紐づいています。');
-    await later('なので、このチャットだけは今お使いの端末から開くようにしてください！');
-    await later('先ほどお送りしたUNKNOWN PAGEやデータベース、ホームページは、パソコンなど別の端末で開いていただいて大丈夫です。');
+    await later('なので、このチャットだけは今お使いの端末から開くようにしてください。');
+    await later('先ほどお送りしたページや本部ホームページについては、パソコンなど別の端末で確認していただいて大丈夫です。');
+    await later('それでは、お願いいたします！');
 
     busy=false;
   }
