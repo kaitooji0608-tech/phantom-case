@@ -1,4 +1,4 @@
-# phantom-case-police v13
+# phantom-case-police v14 / main-flow restore
 
 怪盗関連事件特別捜査本部 ARG の静的サイトです。GitHub Pages へそのまま配置できます。
 
@@ -7,7 +7,7 @@
 
 ## 主なURL
 - `/police/` トップ
-- `/police/chat/` セキュアチャット
+- `/police/chat/` メインストーリー開始地点。本人確認 → 捜査協力依頼 → 記録照合 → おじさん乱入
 - `/police/puzzle/` 5問の記録照合
 - `/police/search/` 検索
 - `/police/secret/` SECRET INDEX（本編ではクリア後に案内）
@@ -28,3 +28,6 @@
 
 ## 注意
 `/police/dev/` はテスト用です。ユーザーからリンクしない設計ですが、GitHub Pages上ではURLを知っていれば閲覧可能です。
+
+## メインチャット
+チャット画面は独立したセキュアチャネルとして実装しており、本人確認・捜査協力への同意前には警察DBのグローバルナビを表示しません。会話支援AIは返信・行動候補のレコメンドのみを行い、担当者は相沢本人です。
