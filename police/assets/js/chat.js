@@ -441,7 +441,15 @@
   function resetAll(){
     [STATE_KEY,DECLINE_KEY,LOG_KEY,INTRO_KEY].forEach(k=>localStorage.removeItem(k));
     localStorage.removeItem('phantomPolicePuzzleComplete');
-    location.href=location.pathname;
+    state='start';
+    declineCount=0;
+    log=[];
+    M.innerHTML='';
+    clearTyping();
+    clearActions();
+    try{
+      history.replaceState({},'',location.pathname);
+    }catch(e){}
   }
 
   async function runConnectionIntro(){
@@ -498,6 +506,9 @@
 
   if(qs.get('reset')==='1'){
     resetAll();
+    INTRO.hidden=false;
+    APP.hidden=true;
+    CONNECT.addEventListener('click',runConnectionIntro,{once:true});
     return;
   }
 
