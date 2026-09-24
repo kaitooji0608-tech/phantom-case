@@ -1,0 +1,60 @@
+
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:-apple-system,BlinkMacSystemFont,"Noto Sans JP","Yu Gothic",Meiryo,sans-serif;
+  color:#e8edf1;
+  background:#091016;
+  line-height:1.7;
+}
+.shell{max-width:860px;margin:auto;padding:0 18px 60px}
+.terminal-head{
+  margin:0 -18px 34px;
+  padding:12px 18px;
+  color:#8fa1ad;
+  border-bottom:1px solid #25313a;
+  font:11px ui-monospace,monospace;
+  letter-spacing:.1em;
+}
+.signal{display:inline-block;width:7px;height:7px;border-radius:50%;background:#58ae7b;margin-right:7px}
+.intro{padding:12px 0 22px}
+.eyebrow{color:#738b9c;font:11px ui-monospace,monospace;letter-spacing:.12em}
+h1{font-size:29px;line-height:1.4;margin:5px 0}
+.intro>p:last-child{color:#9cabb5}
+.puzzle{display:grid;gap:13px}
+.row{
+  display:grid;grid-template-columns:1fr auto;gap:22px;align-items:center;
+  padding:20px;
+  border:1px solid #293640;
+  border-radius:8px;
+  background:#101920;
+}
+.row small{color:#6f8797;font:10px ui-monospace,monospace}
+.row h2{font-size:17px;margin:4px 0}
+.row p{font-size:13px;margin:0;color:#93a1aa}
+.answer{
+  display:flex;align-items:center;overflow:hidden;
+  border:1px solid #445762;border-radius:6px;background:#091016;
+}
+.answer span{padding:10px;color:#aec0ca;font:700 15px ui-monospace,monospace}
+.answer input{
+  width:76px;border:0;outline:0;padding:10px 6px;
+  color:#fff;background:transparent;font:700 16px ui-monospace,monospace;letter-spacing:.12em
+}
+.answer button{
+  align-self:stretch;border:0;padding:0 13px;color:#dce7ee;background:#294b61
+}
+.state{margin-top:6px;font-size:11px;color:#8dbda0}
+.row.correct{border-color:#4c8262;background:#102019}
+.complete{
+  margin-top:28px;padding:25px;border:1px dashed #c48767;border-radius:8px;background:#201713
+}
+.complete p{margin:2px 0}
+.complete a{
+  display:inline-block;margin-top:18px;color:#fff;background:#6f422f;border-radius:6px;padding:9px 13px;text-decoration:none
+}
+@media(max-width:650px){
+  .row{grid-template-columns:1fr}
+  .answer{width:100%}
+  .answer input{flex:1}
+}
