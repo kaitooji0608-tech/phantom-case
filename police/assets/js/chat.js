@@ -1,6 +1,5 @@
 (function(){
   const M=document.getElementById('messages');
-  const T=document.getElementById('typing-area');
   const A=document.getElementById('chat-actions');
   const F=document.getElementById('chat-form');
   const I=document.getElementById('chat-input');
@@ -21,12 +20,12 @@
   let log=[];
   let busy=false;
 
-  // 相沢の連続メッセージは「前の文を読む時間 + 3秒」で次を表示。
+  // 相沢の連続メッセージは「前の文を読む時間 + 8秒」で次を表示。
   // 読書速度は約600文字/分（10文字/秒）を基準にしています。
   const READING_CHARS_PER_SEC=10;
-  const EXTRA_PAUSE_MS=3000;
-  const MIN_CHAT_DELAY_MS=4000;
-  const MAX_CHAT_DELAY_MS=15000;
+  const EXTRA_PAUSE_MS=8000;
+  const MIN_CHAT_DELAY_MS=9000;
+  const MAX_CHAT_DELAY_MS=20000;
   let lastReadableChars=0;
   let lastRole=null;
 
@@ -152,22 +151,26 @@
   }
 
   function clearTyping(){
-    T.innerHTML='';
+    const existing=M.querySelector('.typing-row');
+    if(existing)existing.remove();
   }
 
   function showTyping(role='aizawa'){
+    clearTyping();
+
     const name=role==='ojisan'?'未登録ユーザー':'相沢 直人';
     const av=role==='ojisan'?'？':'相';
 
-    T.innerHTML=
-      '<div class="typing-row">'+
-        '<div class="chat-avatar">'+av+'</div>'+
-        '<div class="typing-stack">'+
-          '<div class="typing-name">'+name+'</div>'+
-          '<div class="typing-bubble"><i></i><i></i><i></i></div>'+
-        '</div>'+
+    const row=document.createElement('div');
+    row.className='typing-row';
+    row.innerHTML=
+      '<div class="chat-avatar">'+av+'</div>'+
+      '<div class="typing-stack">'+
+        '<div class="typing-name">'+name+'</div>'+
+        '<div class="typing-bubble"><i></i><i></i><i></i></div>'+
       '</div>';
 
+    M.appendChild(row);
     scrollBottom();
   }
 
@@ -177,7 +180,7 @@
 
   function readingDelay(){
     // 連続する相沢／おじさんの発言では、
-    // 直前の吹き出しを読む時間に3秒を足す。
+    // 直前の吹き出しを読む時間に8秒を足す。
     if(lastRole==='aizawa' || lastRole==='ojisan'){
       const readingMs=(lastReadableChars/READING_CHARS_PER_SEC)*1000;
       return Math.max(
@@ -186,15 +189,15 @@
       );
     }
 
-    // ユーザーが送信した直後などは、最低4秒は「入力中」を見せる。
+    // ユーザーが送信した直後などは、最低9秒は「入力中」を見せる。
     return MIN_CHAT_DELAY_MS;
   }
 
   async function later(html,delay=null,role='aizawa'){
     showTyping(role);
 
-    // 個別指定のdelayも最低4秒を下回らないようにし、
-    // 通常は「前の文を読む時間 + 3秒」を使用する。
+    // 個別指定のdelayも最低9秒を下回らないようにし、
+    // 通常は「前の文を読む時間 + 8秒」を使用する。
     const waitMs=delay===null
       ? readingDelay()
       : Math.max(MIN_CHAT_DELAY_MS,delay);
