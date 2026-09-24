@@ -20,6 +20,12 @@
   let declineCount=parseInt(localStorage.getItem(DECLINE_KEY)||'0',10)||0;
   let log=[];
   let busy=false;
+
+  // チャットの体感速度。
+  // 1.0 = 以前の速度 / 1.8 = 現在の設定
+  // 後でさらに遅く・速くしたい場合はこの数値だけ調整できます。
+  const CHAT_PACE=1.8;
+
   const qs=new URLSearchParams(location.search);
 
   try{log=JSON.parse(localStorage.getItem(LOG_KEY)||'[]')}catch(e){log=[]}
@@ -156,7 +162,12 @@
 
   async function later(html,delay=null,role='aizawa'){
     showTyping(role);
-    await wait(delay===null?typingTime(html):delay);
+
+    const baseDelay=delay===null?typingTime(html):delay;
+    const pacedDelay=Math.round(baseDelay*CHAT_PACE);
+
+    await wait(pacedDelay);
+
     clearTyping();
     addMessage(html,role);
   }
