@@ -58,3 +58,15 @@ h1{font-size:29px;line-height:1.4;margin:5px 0}
   .answer{width:100%}
   .answer input{flex:1}
 }
+
+.codeword-label{
+  margin-top:16px!important;
+  color:#a08c80;
+  font-size:11px;
+}
+.codeword{
+  margin:8px 0!important;
+  color:#fff;
+  font:700 25px ui-monospace,SFMono-Regular,Menlo,monospace;
+  letter-spacing:.18em;
+}

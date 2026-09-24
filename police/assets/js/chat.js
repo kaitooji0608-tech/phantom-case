@@ -10,9 +10,9 @@
   const STATUS_TEXT=document.getElementById('connect-status-text');
   const PROGRESS=document.getElementById('connect-progress-bar');
 
-  const STATE_KEY='phantomPoliceMainChatV5State';
-  const DECLINE_KEY='phantomPoliceMainChatV5Declines';
-  const LOG_KEY='phantomPoliceMainChatV5Log';
+  const STATE_KEY='phantomPoliceMainChatV6State';
+  const DECLINE_KEY='phantomPoliceMainChatV6Declines';
+  const LOG_KEY='phantomPoliceMainChatV6Log';
   const INTRO_KEY='phantomSecureChatIntroSeenV1';
 
   let state=localStorage.getItem(STATE_KEY)||'start';
@@ -20,12 +20,12 @@
   let log=[];
   let busy=false;
 
-  // 相沢の連続メッセージは「前の文を読む時間 + 3秒」で次を表示。
+  // 相沢の連続メッセージは「前の文を読む時間 + 2秒」で次を表示。
   // 読書速度は約600文字/分（10文字/秒）を基準にしています。
   const READING_CHARS_PER_SEC=10;
-  const EXTRA_PAUSE_MS=3000;
-  const MIN_CHAT_DELAY_MS=4000;
-  const MAX_CHAT_DELAY_MS=15000;
+  const EXTRA_PAUSE_MS=2000;
+  const MIN_CHAT_DELAY_MS=3000;
+  const MAX_CHAT_DELAY_MS=14000;
   let lastReadableChars=0;
   let lastRole=null;
 
@@ -180,7 +180,7 @@
 
   function readingDelay(){
     // 連続する相沢／おじさんの発言では、
-    // 直前の吹き出しを読む時間に3秒を足す。
+    // 直前の吹き出しを読む時間に2秒を足す。
     if(lastRole==='aizawa' || lastRole==='ojisan'){
       const readingMs=(lastReadableChars/READING_CHARS_PER_SEC)*1000;
       return Math.max(
@@ -189,15 +189,15 @@
       );
     }
 
-    // ユーザーが送信した直後などは、最低4秒は「入力中」を見せる。
+    // ユーザーが送信した直後などは、最低3秒は「入力中」を見せる。
     return MIN_CHAT_DELAY_MS;
   }
 
   async function later(html,delay=null,role='aizawa'){
     showTyping(role);
 
-    // 個別指定のdelayも最低4秒を下回らないようにし、
-    // 通常は「前の文を読む時間 + 3秒」を使用する。
+    // 個別指定のdelayも最低3秒を下回らないようにし、
+    // 通常は「前の文を読む時間 + 2秒」を使用する。
     const waitMs=delay===null
       ? readingDelay()
       : Math.max(MIN_CHAT_DELAY_MS,delay);
@@ -253,9 +253,10 @@
     return repoRoot()+'investigation/';
   }
 
-  function plainURL(url){
-    const safe=escapeHTML(url);
-    return '<a href="'+safe+'">'+safe+'</a>';
+  function namedLink(url,label){
+    const safeURL=escapeHTML(url);
+    const safeLabel=escapeHTML(label);
+    return '<a href="'+safeURL+'">'+safeLabel+'</a>';
   }
 
   function normalize(v){
@@ -406,20 +407,77 @@
     await later('助かります。');
 
     await later('それでは、今回発見された不審なURLを共有させていただきます。');
-    addMessage(plainURL(investigationURL()));
+    showTyping();
+    await wait(2000);
+    clearTyping();
+    addMessage(namedLink(investigationURL(),'UNKNOWN PAGE'));
 
     await later('現時点では、危険なプログラムなどは確認されていませんので、そのまま開いていただいて大丈夫です。');
 
     await later('あと、何かの手がかりになるかもしれないので、怪盗に関する情報のデータベースもお渡ししておきます。');
-    addMessage(plainURL(policeRoot()+'db/'));
+    showTyping();
+    await wait(2000);
+    clearTyping();
+    addMessage(namedLink(policeRoot()+'db/','怪盗関連事件データベース'));
 
-    await later('過去の事件や怪盗に関する情報が入っています。気になる言葉や番号があれば、こちらも確認してみてください。');
+    await later('過去の事件や怪盗に関する情報が入っています。こちらも確認してみてください。');
 
     await later('それと、捜査協力をお願いする方には、本部の概要や公開可能な資料をご確認いただけるよう、準備公開版のホームページもあわせてご案内する運用になっています。');
     await later('今回お送りしたデータベースも、このサイトの一部です。');
-    addMessage(plainURL(policeRoot()));
+    showTyping();
+    await wait(2000);
+    clearTyping();
+    addMessage(namedLink(policeRoot(),'怪盗関連事件特別捜査本部 HP'));
 
     await later('何か分からない点や、気になることがあれば、このチャットでお気軽に聞いてください！');
+
+    await later('あ、最後に1点だけ注意点です。');
+    await later('このチャットは、セキュリティの関係で初回に接続した端末情報と紐づいています。');
+    await later('なので、このチャットだけは今お使いの端末から開くようにしてください！');
+    await later('先ほどお送りしたUNKNOWN PAGEやデータベース、ホームページは、パソコンなど別の端末で開いていただいて大丈夫です。');
+
+    busy=false;
+  }
+
+  async function acceptCodeword(){
+    busy=true;
+    clearActions();
+    saveState('reported');
+
+    await later('分かりました。ありがとうございます。');
+    await later('先ほどのページを進めた先で、その言葉が表示されたということですね。');
+    await later('こちらでも記録しておきます。');
+
+    await wait(1200);
+    addSystem('通信経路に未登録の接続を検知しました');
+
+    await later(
+      '……すみません。今、こちらの画面に見慣れない接続表示が出ています。',
+      1000
+    );
+
+    await later(
+      'ちゃんと伝えてくれたネ〜😏♪',
+      1100,
+      'ojisan'
+    );
+
+    await later(
+      '警察さんもビックリしてるんじゃないカナ〜？',
+      1350,
+      'ojisan'
+    );
+
+    await later(
+      'でも、まだ終わりじゃないヨ♪',
+      1350,
+      'ojisan'
+    );
+
+    addMessage(
+      '<a href="../mission/house/">次の手がかり</a>',
+      'ojisan'
+    );
 
     busy=false;
   }
@@ -514,7 +572,7 @@
   async function generic(){
     if(state==='mission'){
       return later(
-        'ありがとうございます。まずは先ほどお送りしたURLを確認してみてください。何か気になることがあれば教えてください。',
+        'ありがとうございます。まずは先ほどお送りしたページや資料を確認してみてください。何か気になることがあれば教えてください。',
         760
       );
     }
@@ -614,6 +672,29 @@
       return;
     }
 
+    if(state==='mission' && normalize(v).toUpperCase()==='NEXORA'){
+      busy=true;
+      await later('「NEXORA」……ですか？');
+      await later('それは、先ほどお送りしたページを進めた先で表示された言葉ですか？');
+      saveState('codewordConfirm');
+      recommendations([
+        ['はい',acceptCodeword,true]
+      ]);
+      busy=false;
+      return;
+    }
+
+    if(state==='codewordConfirm'){
+      if(/はい|そう|そうです|yes/i.test(v)){
+        return acceptCodeword();
+      }
+      await later('先ほどのページを進めた先で表示された言葉かどうか、確認させてください。');
+      recommendations([
+        ['はい',acceptCodeword,true]
+      ]);
+      return;
+    }
+
     return generic();
   });
 
@@ -636,16 +717,9 @@
       return;
     }
 
-    if(
-      state==='mission' &&
-      localStorage.getItem('phantomPolicePuzzleComplete')==='1'
-    ){
+    if(state==='codewordConfirm'){
       recommendations([
-        [
-          '照合結果を相沢さんに報告する',
-          ()=>location.href='?report=1',
-          true
-        ]
+        ['はい',acceptCodeword,true]
       ]);
     }
   }
