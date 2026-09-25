@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#050607">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<title>G-404 / UNKNOWN RELAY</title>
+<style>
+:root{
+  --bg:#050607;
+  --panel:#0a0d0e;
+  --line:#252b2d;
+  --text:#d9dfdd;
+  --muted:#6e7976;
+  --hot:#b9ffcf;
+  --warn:#d7c18a;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  background:
+    radial-gradient(circle at 50% 32%,rgba(89,145,105,.07),transparent 32%),
+    linear-gradient(180deg,#030405,#080a0b);
+  color:var(--text);
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,"Noto Sans Mono CJK JP","Noto Sans JP",monospace;
+  overflow:hidden;
+}
+body::before{
+  content:"";
+  position:fixed;inset:0;pointer-events:none;z-index:20;
+  background:repeating-linear-gradient(
+    0deg,
+    rgba(255,255,255,.018) 0,
+    rgba(255,255,255,.018) 1px,
+    transparent 1px,
+    transparent 4px
+  );
+  mix-blend-mode:screen;
+}
+.wrap{
+  min-height:100dvh;
+  display:grid;
+  place-items:center;
+  padding:24px 18px calc(24px + env(safe-area-inset-bottom));
+}
+.terminal{
+  width:min(100%,520px);
+  border:1px solid var(--line);
+  background:rgba(7,9,10,.88);
+  box-shadow:0 24px 90px rgba(0,0,0,.55);
+  position:relative;
+  overflow:hidden;
+}
+.top{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 12px;
+  border-bottom:1px solid var(--line);
+  color:var(--muted);
+  font-size:10px;
+  letter-spacing:.13em;
+}
+.lamps{display:flex;gap:5px}
+.lamps i{display:block;width:6px;height:6px;border-radius:50%;background:#303638}
+.screen{
+  min-height:420px;
+  padding:22px 18px 24px;
+  position:relative;
+}
+.log{
+  font-size:11px;
+  line-height:1.85;
+  color:#7d8885;
+  white-space:pre-wrap;
+  min-height:145px;
+}
+.cursor::after{
+  content:"_";
+  animation:blink .8s steps(1) infinite;
+}
+@keyframes blink{50%{opacity:0}}
+.result{
+  opacity:0;
+  transform:translateY(8px);
+  transition:opacity .5s ease,transform .5s ease;
+  border-top:1px solid var(--line);
+  padding-top:24px;
+}
+.result.show{opacity:1;transform:none}
+.code{
+  color:var(--muted);
+  font-size:10px;
+  letter-spacing:.18em;
+  margin-bottom:11px;
+}
+.word{
+  margin:0;
+  font-size:clamp(38px,12vw,64px);
+  line-height:1;
+  letter-spacing:.13em;
+  color:var(--hot);
+  text-shadow:0 0 20px rgba(185,255,207,.16);
+  position:relative;
+}
+.word.glitch{animation:glitch .5s linear 1}
+@keyframes glitch{
+  0%{transform:none}
+  20%{transform:translateX(-3px);filter:blur(.2px)}
+  40%{transform:translateX(3px)}
+  60%{transform:translateX(-1px)}
+  100%{transform:none}
+}
+.rule{
+  width:42px;height:1px;background:#56615e;margin:22px 0 18px;
+}
+.instruction{
+  margin:0;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif;
+  font-size:17px;
+  font-weight:650;
+  line-height:1.85;
+  letter-spacing:.03em;
+  color:#f0f2f1;
+}
+.instruction strong{
+  color:var(--hot);
+  font-weight:800;
+}
+.sub{
+  margin-top:20px;
+  color:#68726f;
+  font-size:10px;
+  line-height:1.7;
+  letter-spacing:.08em;
+}
+.noise{
+  position:absolute;inset:0;pointer-events:none;opacity:0;
+  background:
+    linear-gradient(90deg,transparent 0 20%,rgba(185,255,207,.07) 20% 21%,transparent 21% 70%,rgba(255,255,255,.04) 70% 71%,transparent 71%),
+    repeating-linear-gradient(0deg,transparent 0 8px,rgba(255,255,255,.03) 8px 9px);
+}
+.noise.flash{animation:flash .55s ease-out}
+@keyframes flash{
+  0%{opacity:0}
+  15%{opacity:.9;transform:translateX(-4px)}
+  32%{opacity:.15;transform:translateX(5px)}
+  55%{opacity:.65;transform:translateX(-2px)}
+  100%{opacity:0;transform:none}
+}
+@media (max-height:560px){
+  .screen{min-height:360px;padding-top:16px}
+  .log{min-height:115px}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <main class="terminal" aria-live="polite">
+    <div class="top">
+      <span>UNKNOWN RELAY / G-404</span>
+      <span class="lamps" aria-hidden="true"><i></i><i></i><i></i></span>
+    </div>
+
+    <section class="screen">
+      <div class="noise" id="noise"></div>
+      <div class="log cursor" id="log"></div>
+
+      <div class="result" id="result">
+        <div class="code">DECODED IDENTIFIER</div>
+        <h1 class="word" id="word">GLITCH</h1>
+        <div class="rule"></div>
+        <p class="instruction">
+          警察に<br>
+          <strong>「GLITCH」</strong><br>
+          と伝えろ。
+        </p>
+        <div class="sub">
+          DO NOT FORWARD THIS CHANNEL.<br>
+          CONNECTION WILL NOT BE RESTORED.
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+(() => {
+  const log = document.getElementById('log');
+  const result = document.getElementById('result');
+  const noise = document.getElementById('noise');
+  const word = document.getElementById('word');
+
+  const lines = [
+    '[G-404] relay detected',
+    '[....] origin ........ UNKNOWN',
+    '[....] route ......... MASKED',
+    '[....] payload ....... LOCKED',
+    '[....] extracting fragment',
+    '[ OK ] fragment recovered'
+  ];
+
+  const wait = ms => new Promise(r => setTimeout(r, ms));
+
+  async function boot(){
+    await wait(250);
+    for(let i=0;i<lines.length;i++){
+      log.textContent += (i ? '\n' : '') + lines[i];
+      await wait(i === lines.length - 1 ? 420 : 240 + i*55);
+    }
+    log.classList.remove('cursor');
+    noise.classList.add('flash');
+    if(navigator.vibrate) navigator.vibrate([40,35,80]);
+    await wait(230);
+    result.classList.add('show');
+    word.classList.add('glitch');
+  }
+
+  boot();
+})();
+</script>
+</body>
+</html>
