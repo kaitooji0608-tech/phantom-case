@@ -372,8 +372,7 @@
   }
 
   function isGlitchText(v){
-    const t=intentText(v);
-    return /glitch|グリッチ/.test(t);
+    return String(v).trim()==='GLITCH';
   }
 
   function isSquirrelQrFoundText(v){
