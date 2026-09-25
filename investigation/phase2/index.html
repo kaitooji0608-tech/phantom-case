@@ -298,25 +298,77 @@
       font-size:15px;
     }
 
-    .secret-link{
-      display:none;
-      width:fit-content;
-      margin:26px 0 6px;
-      padding:12px 15px;
-      border:1px solid #3a434b;
-      border-radius:2px;
-      color:#e9ecee;
-      background:#11161a;
-      text-decoration:none;
-      font:600 11px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
-      letter-spacing:.16em;
+    body,
+    .transmission{
+      transition:
+        background 1.1s ease,
+        border-color .9s ease,
+        box-shadow .9s ease,
+        color .7s ease;
     }
 
-    .secret-link.show{display:inline-block}
+    body.birthday-mode{
+      background:
+        radial-gradient(circle at 50% -6%,rgba(255,210,150,.16),transparent 34%),
+        radial-gradient(circle at 12% 18%,rgba(255,145,180,.10),transparent 24%),
+        radial-gradient(circle at 88% 22%,rgba(135,205,255,.10),transparent 27%),
+        linear-gradient(180deg,#100b0d 0%,#0d0b0d 48%,#08090a 100%);
+    }
 
-    .secret-link:hover{
-      background:#181e23;
-      border-color:#59656f;
+    body.birthday-mode::before{
+      opacity:.28;
+    }
+
+    .transmission.birthday-reveal{
+      border-color:#5a4447;
+      background:
+        linear-gradient(150deg,rgba(255,226,185,.045),transparent 46%),
+        rgba(13,10,12,.91);
+      box-shadow:
+        0 32px 100px rgba(0,0,0,.48),
+        0 0 60px rgba(255,190,145,.045),
+        inset 0 1px 0 rgba(255,255,255,.04);
+    }
+
+    .birthday-reveal .ending-head{
+      color:#9c7f7f;
+    }
+
+    .ending-line.birthday{
+      color:#fff3dd;
+      text-shadow:
+        0 0 22px rgba(255,220,175,.20),
+        0 0 48px rgba(255,150,170,.10);
+    }
+
+    .ending-line.birthday-sub{
+      font-family:-apple-system,BlinkMacSystemFont,"Noto Sans JP","Yu Gothic",Meiryo,sans-serif;
+      font-size:clamp(21px,4.1vw,31px);
+      font-weight:800;
+      color:#fff1e7;
+      text-shadow:0 0 22px rgba(255,210,180,.13);
+    }
+
+    .ending-line.keyword{
+      width:fit-content;
+      margin-top:4px;
+      padding:11px 15px;
+      border:1px dashed #8a6b70;
+      border-radius:3px;
+      background:rgba(255,255,255,.035);
+      color:#fff5e9;
+      font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+      font-size:clamp(18px,3.2vw,24px);
+      font-weight:800;
+      letter-spacing:.08em;
+    }
+
+    .ending-line.punchline{
+      font-family:-apple-system,BlinkMacSystemFont,"Noto Sans JP","Yu Gothic",Meiryo,sans-serif;
+      font-size:clamp(23px,4.8vw,36px);
+      font-weight:900;
+      color:#fff4ea;
+      text-shadow:0 0 22px rgba(255,205,170,.13);
     }
 
     .glitch-flash{
@@ -395,13 +447,6 @@
       <section class="ending-stage" id="ending-stage" aria-live="polite">
         <p class="ending-head">FINAL TRANSMISSION</p>
         <div class="ending-log" id="ending-log"></div>
-        <a
-          class="secret-link"
-          id="secret-link"
-          href="../../police/secret/"
-          target="_blank"
-          rel="noopener noreferrer"
-        >SECRET INDEX</a>
       </section>
     </section>
   </main>
@@ -420,7 +465,6 @@
       const status = document.getElementById('answer-status');
       const transmission = document.querySelector('.transmission');
       const endingLog = document.getElementById('ending-log');
-      const secretLink = document.getElementById('secret-link');
       const flash = document.getElementById('glitch-flash');
 
       const normalize = value =>
@@ -459,50 +503,77 @@
       async function runEnding(){
         transmission.classList.add('ending');
 
+        // 最後までUNKNOWN USERとして振る舞う。
         await addLine('見事だ。');
         await addLine('すべての謎を解いたようだな。');
         await addLine('ならば約束通り、お前から預かったものを返してやろう。');
         await wait(900);
         await addLine('……その前に。');
 
+        // ここで事件モードを終わらせ、誕生日サプライズへ切り替える。
         await glitch();
+        document.body.classList.add('birthday-mode');
+        transmission.classList.add('birthday-reveal');
+        await wait(350);
 
-        await addLine('……って言いたいところなんだけどネ😅','ojisan');
-        await addLine('もうこの喋り方、疲れたヨ〜〜〜‼️🤣','ojisan');
-        await addLine('お久しぶり〜〜😎✨','ojisan');
-        await addLine('怪盗ヘンタイおじさんだヨ〜〜〜‼️','ojisan');
+        await addLine('🎉🎂 HAPPY BIRTHDAY 🎂🎉','birthday');
+        await addLine('30歳、おめでとう〜〜〜‼️🥳✨✨✨','birthday-sub');
 
-        await addLine('GLITCHくんの名前、ちょ〜〜っとだけ借りちゃったヨ🤣','ojisan');
+        await wait(500);
+        await addLine('お久しぶりの照り焼き〜〜〜😎✨','ojisan');
+        await addLine('怪盗ヘンタイおじさんだヨ〜〜〜‼️🤣🤣🤣','ojisan');
 
-        await wait(800);
-        await addLine('さてさて……','ojisan');
-        await addLine('ボクが盗んだ「大切なもの」なんだけどサ😏','ojisan');
-        await addLine('そんなものありません〜〜‼️🤣🤣🤣','ojisan');
-        await addLine('お騒がせしました〜〜💦💦','ojisan');
+        await addLine('いや〜〜〜、気づかなかったでしょ⁉️😏✨','ojisan');
+        await addLine('別の怪盗さんだと思ったよね⁉️ 驚かせたくて、勝手に名前使っちゃった（爆笑）🤣🤣🤣','ojisan');
+        await addLine('GLITCHくん、勝手に名前使ってゴメンネ〜〜〜🙏💦','ojisan');
+        await addLine('許してちょんまげ〜〜💦💦💦','ojisan');
 
         await wait(700);
-        await addLine('代わりと言っちゃなんだけどサ〜','ojisan');
-        await addLine('警察さんたちの闇、まだまだ深そうなんだよネ〜👀','ojisan');
-        await addLine('今回見つけたヤツ以外にも、普通に見てるだけじゃ出てこないページがあるみたい😏','ojisan');
-        await addLine('こんなのも見つけたから、置いとくネ👇','ojisan');
+        await addLine('さてさて……😏','ojisan');
+        await addLine('じゃあ、そろそろ約束のアレ。','ojisan');
+        await addLine('おじさんが、「お前の大切なものを一つ預かった」って言ってたヤツなんだけどネ。','ojisan');
 
-        secretLink.classList.add('show');
-        secretLink.scrollIntoView({behavior:'smooth',block:'nearest'});
-        await wait(1000);
+        await wait(700);
+        await addLine('…………。','ojisan');
+        await addLine('…………。','ojisan');
+        await addLine('そんなものありません〜〜〜‼️🤣🤣🤣🤣🤣','punchline');
+        await addLine('何も盗んでませ〜〜〜ん‼️🤣','ojisan');
+        await addLine('お騒がせしました〜〜〜〜‼️💦💦💦','ojisan');
+        await addLine('ただただ今回も、ナチちゃんを驚かせたかっただけなのです🥺👉👈','ojisan');
 
-        await addLine('これは完全にオマケだからネ‼️ 暇なときにでも調べてみて〜🤣','ojisan');
+        await addLine('お詫びと言っちゃなんだけど、今度おじさんの夜のテクニックを披露してあ・げ・る💛','ojisan');
+        await addLine('ナンチャッテ^^;','ojisan');
 
-        await wait(1000);
-        await addLine('ということで……','ojisan');
-        await addLine('🎉🎂 HAPPY BIRTHDAY 🎂🎉','birthday');
-        await addLine('30歳、おめでとう〜〜〜‼️🥳✨','ojisan');
-        await addLine('今回も最後まで付き合ってくれてありがとネ😎','ojisan');
-        await addLine('またそのうち、何か盗みに来るかもしれないから、戸締まりはちゃんとしておくんだヨ〜〜🤣','ojisan');
+        await wait(650);
+        await addLine('冗談はよしこちゃんで🤣','ojisan');
+        await addLine('実は、おじさんからプレゼントがあります🎁✨','ojisan');
+        await addLine('ナチちゃん、謎解くの好きだよね〜〜😏','ojisan');
+
+        await addLine('警察さんのサイトなんだけどサ、普通に見てるだけじゃ出てこないもの、まだまだ結構あるっぽいヨ👀','ojisan');
+        await addLine('だからネ〜〜、そういう秘密を見つけられるように、おじさん専用のお部屋も一個だけ作っといたヨ〜〜〜‼️😎✨','ojisan');
+        await addLine('警察さんのホームページの検索欄に、','ojisan');
+        await addLine('おじさんの秘密の部屋','keyword');
+        await addLine('って入れてみてヨ🤣✨','ojisan');
+        await addLine('ただし‼️ 一文字でも間違ったら出てきませ〜〜〜ん‼️🤣','ojisan');
+        await addLine('ヒ・ミ・ツのお部屋だからネ〜〜〜🤫💕','ojisan');
+
+        await addLine('ナチちゃんの秘密も教えてほしいなぁ〜〜💕','ojisan');
+        await addLine('下着の色とか……もしくはビーチクの色とか……','ojisan');
+        await addLine('ｵｲｵｲ･･ (;´д｀)ﾉ','ojisan');
 
         await wait(900);
-        await addLine('あ。そういえば忘れてた😳','ojisan');
-        await addLine('相沢クン、まだ事件の続きだと思ってるんじゃない⁉️🤣','ojisan');
-        await addLine('警察さんとのチャットに戻って、「謎が全部解けました」って教えてあげてネ〜〜👋😎','report');
+        await addLine('…………。','ojisan');
+        await addLine('あっ‼️😳','ojisan');
+        await addLine('そういえば、相沢クンのこと完全に忘れてた‼️🤣🤣🤣','ojisan');
+        await addLine('あの人、今ごろまだ「侵入の可能性が……」「通信記録を確認します……」とか真面目にやってるんじゃない⁉️🤣💦','ojisan');
+        await addLine('かわいそうだからサ〜〜〜、','ojisan');
+        await addLine('最初に使ってた警察さんとのチャットに戻って、「謎が全部解けました」って教えてあげてネ😎👍','report');
+
+        await wait(650);
+        await addLine('じゃあ、おじさんはこの辺で……','ojisan');
+        await addLine('バイバ〜〜〜〜イ‼️👋🤣✨','birthday-sub');
+        await addLine('またいつか、どこかで会おうネ〜〜〜😎💕','ojisan');
+        await addLine('マンボ〜〜〜〜‼️🕺✨','birthday-sub');
       }
 
       form.addEventListener('submit', async event => {
