@@ -10,9 +10,9 @@
   const STATUS_TEXT=document.getElementById('connect-status-text');
   const PROGRESS=document.getElementById('connect-progress-bar');
 
-  const STATE_KEY='phantomPoliceMainChatV9State';
-  const DECLINE_KEY='phantomPoliceMainChatV9Declines';
-  const LOG_KEY='phantomPoliceMainChatV9Log';
+  const STATE_KEY='phantomPoliceMainChatV10State';
+  const DECLINE_KEY='phantomPoliceMainChatV10Declines';
+  const LOG_KEY='phantomPoliceMainChatV10Log';
   const INTRO_KEY='phantomSecureChatIntroSeenV1';
 
   let state=localStorage.getItem(STATE_KEY)||'start';
@@ -696,6 +696,55 @@
     busy=false;
   }
 
+
+  async function reportPuzzleSolved(){
+    busy=true;
+    clearActions();
+
+    await later('全部解けたんですね。');
+    await later('お疲れさまでした。');
+    await later('その後、ご自宅に何か異常はありませんか？');
+
+    saveState('finalCheckHome');
+    recommendations([
+      ['今のところ特にありません',finalHomeSafe,true]
+    ]);
+
+    busy=false;
+  }
+
+  async function finalHomeSafe(){
+    busy=true;
+    clearActions();
+
+    await later('分かりました。ひとまず安心しました。');
+    await later('相手が何者だったのか、何か分かりましたか？');
+
+    saveState('finalAskIdentity');
+    recommendations([
+      ['怪盗ヘンタイおじさんでした',finalRevealIdentity,true]
+    ]);
+
+    busy=false;
+  }
+
+  async function finalRevealIdentity(){
+    busy=true;
+    clearActions();
+
+    await later('……怪盗ヘンタイおじさん、ですか。');
+    await later('なるほど……。');
+    await later('では、「GLITCH」という言葉も、別の怪盗の名前を使った偽装だった可能性が高そうですね。');
+    await later('この点も含め、先ほどの通信記録はこちらで確認します。');
+
+    await later('それと、先ほどのページであなた方が発見した内容についても、本部で引き続き事実確認を進めています。');
+    await later('長時間、捜査にご協力いただき本当にありがとうございました。');
+    await later('何より、ご無事でよかったです。');
+
+    saveState('complete');
+    busy=false;
+  }
+
   async function generic(){
     if(state==='mission'){
       return later(
@@ -734,6 +783,18 @@
 
     if(state==='phase2'){
       return later('こちらでも並行して確認を進めています。何か異常を感じた場合は、すぐに中断してください。');
+    }
+
+    if(state==='finalCheckHome'){
+      return later('その後、ご自宅に何か異常はありませんか？');
+    }
+
+    if(state==='finalAskIdentity'){
+      return later('相手が何者だったのか、何か分かったことはありますか？');
+    }
+
+    if(state==='complete'){
+      return later('今回の件については、本部で引き続き確認を進めています。ご協力ありがとうございました。');
     }
 
     return later('ありがとうございます。確認します。',700);
@@ -849,6 +910,18 @@
       return confirmContinuePhase2();
     }
 
+    if(state==='phase2' && /(謎.*(全部)?解け|全部.*解け|解き終わ|クリア)/.test(v)){
+      return reportPuzzleSolved();
+    }
+
+    if(state==='finalCheckHome' && /特に|ない|ありません|大丈夫/.test(v)){
+      return finalHomeSafe();
+    }
+
+    if(state==='finalAskIdentity' && /ヘンタイ|変態|おじさん/.test(v)){
+      return finalRevealIdentity();
+    }
+
     return generic();
   });
 
@@ -916,6 +989,20 @@
     if(state==='askContinuePhase2'){
       recommendations([
         ['分かりました。確認してみます',confirmContinuePhase2,true]
+      ]);
+      return;
+    }
+
+    if(state==='finalCheckHome'){
+      recommendations([
+        ['今のところ特にありません',finalHomeSafe,true]
+      ]);
+      return;
+    }
+
+    if(state==='finalAskIdentity'){
+      recommendations([
+        ['怪盗ヘンタイおじさんでした',finalRevealIdentity,true]
       ]);
     }
   }

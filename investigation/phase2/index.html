@@ -226,6 +226,122 @@
       .stanza,.meta::before{animation:none}
       .stanza{opacity:1;transform:none}
     }
+
+    .transmission.ending{
+      min-height:72vh;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+    }
+
+    .transmission.ending > :not(.ending-stage){
+      display:none;
+    }
+
+    .ending-stage{
+      display:none;
+      min-height:440px;
+    }
+
+    .transmission.ending .ending-stage{
+      display:block;
+    }
+
+    .ending-head{
+      margin:0 0 30px;
+      color:#59636c;
+      font:10px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+      letter-spacing:.22em;
+    }
+
+    .ending-log{
+      display:grid;
+      gap:18px;
+    }
+
+    .ending-line{
+      margin:0;
+      opacity:0;
+      transform:translateY(5px);
+      color:#e6e8ea;
+      font-size:clamp(17px,3.2vw,23px);
+      line-height:1.9;
+      letter-spacing:.04em;
+      transition:opacity .28s ease,transform .28s ease;
+    }
+
+    .ending-line.show{
+      opacity:1;
+      transform:none;
+    }
+
+    .ending-line.ojisan{
+      font-family:-apple-system,BlinkMacSystemFont,"Noto Sans JP","Yu Gothic",Meiryo,sans-serif;
+      color:#f0e7de;
+    }
+
+    .ending-line.birthday{
+      margin-top:10px;
+      font-family:-apple-system,BlinkMacSystemFont,"Noto Sans JP","Yu Gothic",Meiryo,sans-serif;
+      font-size:clamp(24px,5vw,38px);
+      font-weight:800;
+      letter-spacing:.04em;
+      color:#fff;
+    }
+
+    .ending-line.report{
+      margin-top:14px;
+      padding-top:22px;
+      border-top:1px solid #242b31;
+      color:#cfd4d8;
+      font-family:-apple-system,BlinkMacSystemFont,"Noto Sans JP","Yu Gothic",Meiryo,sans-serif;
+      font-size:15px;
+    }
+
+    .secret-link{
+      display:none;
+      width:fit-content;
+      margin:26px 0 6px;
+      padding:12px 15px;
+      border:1px solid #3a434b;
+      border-radius:2px;
+      color:#e9ecee;
+      background:#11161a;
+      text-decoration:none;
+      font:600 11px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+      letter-spacing:.16em;
+    }
+
+    .secret-link.show{display:inline-block}
+
+    .secret-link:hover{
+      background:#181e23;
+      border-color:#59656f;
+    }
+
+    .glitch-flash{
+      position:fixed;
+      inset:0;
+      z-index:9999;
+      pointer-events:none;
+      opacity:0;
+      background:#000;
+    }
+
+    .glitch-flash.active{
+      animation:endGlitch .65s steps(2,end);
+    }
+
+    @keyframes endGlitch{
+      0%{opacity:0}
+      12%{opacity:1;background:#000}
+      24%{opacity:.82;background:repeating-linear-gradient(0deg,#d7d7d7 0 1px,#111 1px 4px)}
+      38%{opacity:1;background:#000}
+      52%{opacity:.65;background:repeating-linear-gradient(90deg,#777 0 2px,#000 2px 7px)}
+      68%{opacity:1;background:#000}
+      100%{opacity:0}
+    }
+
   </style>
 </head>
 
@@ -275,18 +391,37 @@
       <p class="answer-status" id="answer-status" aria-live="polite"></p>
 
       <p class="foot">THREE PLACES / ONE ANSWER</p>
+
+      <section class="ending-stage" id="ending-stage" aria-live="polite">
+        <p class="ending-head">FINAL TRANSMISSION</p>
+        <div class="ending-log" id="ending-log"></div>
+        <a
+          class="secret-link"
+          id="secret-link"
+          href="../../police/secret/"
+          target="_blank"
+          rel="noopener noreferrer"
+        >SECRET INDEX</a>
+      </section>
     </section>
   </main>
 
+  <div class="glitch-flash" id="glitch-flash" aria-hidden="true"></div>
+
   <script>
     (() => {
-      // 最終キーワードは未確定。
-      // 決定後、この配列に正解を追加すれば判定可能。
-      const FINAL_ANSWERS = [];
+      // DEBUG: エンディング確認用にかなり短くしている。
+      // 本番では必要に応じて ENDING_DEBUG_FAST=false にする。
+      const ENDING_DEBUG_FAST = true;
+      const FINAL_ANSWERS = ['HAPPY BIRTHDAY'];
 
       const form = document.getElementById('final-answer-form');
       const input = document.getElementById('final-answer');
       const status = document.getElementById('answer-status');
+      const transmission = document.querySelector('.transmission');
+      const endingLog = document.getElementById('ending-log');
+      const secretLink = document.getElementById('secret-link');
+      const flash = document.getElementById('glitch-flash');
 
       const normalize = value =>
         String(value || '')
@@ -294,7 +429,83 @@
           .replace(/[\s　_-]/g, '')
           .toUpperCase();
 
-      form.addEventListener('submit', event => {
+      const wait = ms =>
+        new Promise(resolve =>
+          setTimeout(resolve, ENDING_DEBUG_FAST ? Math.min(ms, 220) : ms)
+        );
+
+      async function addLine(text, className=''){
+        const p = document.createElement('p');
+        p.className = 'ending-line' + (className ? ' ' + className : '');
+        p.textContent = text;
+        endingLog.appendChild(p);
+
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => p.classList.add('show'));
+        });
+
+        p.scrollIntoView({behavior:'smooth',block:'nearest'});
+        await wait(1200);
+      }
+
+      async function glitch(){
+        flash.classList.remove('active');
+        void flash.offsetWidth;
+        flash.classList.add('active');
+        await wait(900);
+        flash.classList.remove('active');
+      }
+
+      async function runEnding(){
+        transmission.classList.add('ending');
+
+        await addLine('見事だ。');
+        await addLine('すべての謎を解いたようだな。');
+        await addLine('ならば約束通り、お前から預かったものを返してやろう。');
+        await wait(900);
+        await addLine('……その前に。');
+
+        await glitch();
+
+        await addLine('……って言いたいところなんだけどネ😅','ojisan');
+        await addLine('もうこの喋り方、疲れたヨ〜〜〜‼️🤣','ojisan');
+        await addLine('お久しぶり〜〜😎✨','ojisan');
+        await addLine('怪盗ヘンタイおじさんだヨ〜〜〜‼️','ojisan');
+
+        await addLine('GLITCHくんの名前、ちょ〜〜っとだけ借りちゃったヨ🤣','ojisan');
+
+        await wait(800);
+        await addLine('さてさて……','ojisan');
+        await addLine('ボクが盗んだ「大切なもの」なんだけどサ😏','ojisan');
+        await addLine('そんなものありません〜〜‼️🤣🤣🤣','ojisan');
+        await addLine('お騒がせしました〜〜💦💦','ojisan');
+
+        await wait(700);
+        await addLine('代わりと言っちゃなんだけどサ〜','ojisan');
+        await addLine('警察さんたちの闇、まだまだ深そうなんだよネ〜👀','ojisan');
+        await addLine('今回見つけたヤツ以外にも、普通に見てるだけじゃ出てこないページがあるみたい😏','ojisan');
+        await addLine('こんなのも見つけたから、置いとくネ👇','ojisan');
+
+        secretLink.classList.add('show');
+        secretLink.scrollIntoView({behavior:'smooth',block:'nearest'});
+        await wait(1000);
+
+        await addLine('これは完全にオマケだからネ‼️ 暇なときにでも調べてみて〜🤣','ojisan');
+
+        await wait(1000);
+        await addLine('ということで……','ojisan');
+        await addLine('🎉🎂 HAPPY BIRTHDAY 🎂🎉','birthday');
+        await addLine('30歳、おめでとう〜〜〜‼️🥳✨','ojisan');
+        await addLine('今回も最後まで付き合ってくれてありがとネ😎','ojisan');
+        await addLine('またそのうち、何か盗みに来るかもしれないから、戸締まりはちゃんとしておくんだヨ〜〜🤣','ojisan');
+
+        await wait(900);
+        await addLine('あ。そういえば忘れてた😳','ojisan');
+        await addLine('相沢クン、まだ事件の続きだと思ってるんじゃない⁉️🤣','ojisan');
+        await addLine('警察さんとのチャットに戻って、「謎が全部解けました」って教えてあげてネ〜〜👋😎','report');
+      }
+
+      form.addEventListener('submit', async event => {
         event.preventDefault();
 
         const value = normalize(input.value);
@@ -305,21 +516,21 @@
           return;
         }
 
-        if (!FINAL_ANSWERS.length) {
-          status.className = 'answer-status';
-          status.textContent = '……';
+        if (!FINAL_ANSWERS.map(normalize).includes(value)) {
+          status.className = 'answer-status error';
+          status.textContent = '違う。もう一度考えろ。';
           return;
         }
 
-        if (FINAL_ANSWERS.map(normalize).includes(value)) {
-          status.className = 'answer-status';
-          status.textContent = '正解。';
-          // エンディングURL確定後、ここで遷移させる。
-          return;
-        }
+        input.disabled = true;
+        form.querySelector('button').disabled = true;
+        status.className = 'answer-status';
+        status.textContent = 'FINAL ANSWER ACCEPTED';
 
-        status.className = 'answer-status error';
-        status.textContent = '違う。もう一度考えろ。';
+        localStorage.setItem('phantomCaseFinalSolved','1');
+
+        await wait(700);
+        runEnding();
       });
     })();
   </script>
