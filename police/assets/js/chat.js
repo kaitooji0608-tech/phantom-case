@@ -10,9 +10,9 @@
   const STATUS_TEXT=document.getElementById('connect-status-text');
   const PROGRESS=document.getElementById('connect-progress-bar');
 
-  const STATE_KEY='phantomPoliceMainChatV8State';
-  const DECLINE_KEY='phantomPoliceMainChatV8Declines';
-  const LOG_KEY='phantomPoliceMainChatV8Log';
+  const STATE_KEY='phantomPoliceMainChatV9State';
+  const DECLINE_KEY='phantomPoliceMainChatV9Declines';
+  const LOG_KEY='phantomPoliceMainChatV9Log';
   const INTRO_KEY='phantomSecureChatIntroSeenV1';
 
   let state=localStorage.getItem(STATE_KEY)||'start';
@@ -593,12 +593,13 @@
     await restoreEffect();
 
     await later('……すみません。');
-    await later('今、何者かによる不正アクセスで、通信が一時的に乗っ取られていました。');
-    await later('こちらから操作できない状態になっていました。');
+    await later('今、一瞬こちらから操作できなくなっていました。');
+    await later('通信に何者かが割り込んだようです。');
+    await later('その間、何かありましたか？');
 
     saveState('afterTakeover');
     recommendations([
-      ['怪盗が家に侵入したかもしれないです',reportPossibleIntrusion,true]
+      ['怪しい人物と会話しました',reportPossibleIntrusion,true]
     ]);
   }
 
@@ -606,33 +607,90 @@
     busy=true;
     clearActions();
 
-    await later('……怪盗が、ですか？');
-    await later('さっきの「新しい城」という発言もありましたし、可能性は否定できません。');
-    await later('何か盗まれたものはありますか？');
+    await later('怪しい人物、ですか……。');
+    await later('すぐにこちらでも通信記録を確認します。');
+    await later('少しだけお待ちください。');
+
+    // デバッグ中は通常ディレイ0秒だが、
+    // 「確認している間」だけ演出として少し間を残す。
+    await fxWait(1800);
+
+    await later('お待たせしました。');
+    await later('確認できました。');
+    await later('……また、新しい謎を渡されているんですね。');
+    await later('相手の発言も確認しました。');
+
+    await later('先ほどのリスの件と合わせると、やはり相手はあなたのご自宅について、かなり具体的に把握している可能性があります。');
+    await later('さらに、何かを持ち出したことを示唆している以上、実際にご自宅へ入り、何かを持ち出した可能性も考えなくてはいけません。');
+
+    await later('それと……もう一点。');
+    await later('「GLITCH」という言葉と、今回の不正アクセス……。');
+    await later('どうしても怪盗グリッチを連想してしまいます。');
+    await later('ただ、怪盗グリッチはすでに身柄を確保しているはずなんです。');
+    await later('……この点も、こちらで確認します。');
+
+    await later('今の時点で、ご自宅から何か無くなっているものに心当たりはありますか？');
 
     saveState('askStolenItem');
     recommendations([
-      ['分かりません。新しい謎を渡されました',reportNewPuzzle,true]
+      ['今のところ分かりません',reportNoKnownMissing,true]
     ]);
 
     busy=false;
   }
 
-  async function reportNewPuzzle(){
+  async function reportNoKnownMissing(){
     busy=true;
     clearActions();
 
-    await later('新しい謎……ですか。');
     await later('分かりました。');
+    await later('まず、今ご自宅の中で何か普段と違うことはありませんか？');
+    await later('物音がするとか、玄関や窓が開いているとか……。');
 
+    saveState('askHomeAbnormality');
+    recommendations([
+      ['今のところ特にありません',reportNoHomeAbnormality,true]
+    ]);
+
+    busy=false;
+  }
+
+  async function reportNoHomeAbnormality(){
+    busy=true;
+    clearActions();
+
+    await later('分かりました。');
+    await later('でしたら、念のため戸締まりだけ確認しておいてください。');
     await later('こちらでも、先ほどの不正アクセスと、ご自宅への侵入の可能性について確認を進めます。');
-    await later('それと、先ほどあなたが解いてくださった内容についても、現在本部内で確認が始まっています。');
-    await later('過去の記録と食い違う情報が複数見つかっていて、こちらも少し状況が錯綜しています。');
 
-    await later('ただ、今送られてきたページも、今回の相手につながる重要な手掛かりになる可能性があります。');
-    await later('ご自宅の戸締まりなどに異常がなく、危険を感じないようであれば、無理のない範囲で確認をお願いできますか？');
+    await later('それと、もう一つお伝えしておきます。');
+    await later('先ほどのページであなた方が発見した内容についても、現在こちらで事実確認を始めています。');
+    await later('正直なところ、こちらでも想定していなかった内容がいくつか含まれていました。');
+    await later('過去の事件記録や内部資料との食い違いがないか、本部内で確認しています。');
+
+    await later('なので、こちらはこちらで確認を進めます。');
+    await later('そのうえで、先ほど相手から送られてきた新しいページなんですが……。');
+    await later('今のところ、あの人物につながる直接的な手掛かりは、あのページしかありません。');
+    await later('本来であれば、これ以上ご協力をお願いするような状況ではないんですが……。');
+    await later('相手があなたにだけ続きを送っている以上、ここで接点を切ると手掛かりを失ってしまう可能性があります。');
+    await later('もし今のところご自宅に異常がなく、危険を感じていないようであれば、無理のない範囲で内容を確認していただけませんか？');
+
+    saveState('askContinuePhase2');
+    recommendations([
+      ['分かりました。確認してみます',confirmContinuePhase2,true]
+    ]);
+
+    busy=false;
+  }
+
+  async function confirmContinuePhase2(){
+    busy=true;
+    clearActions();
+
+    await later('ありがとうございます。');
+    await later('ただ、少しでもおかしいと思ったら、すぐに中断してください。');
+    await later('謎を解くことより、ご自身の安全を優先してください。');
     await later('こちらでも並行して調べます。');
-    await later('何か異常を感じたら、その時点ですぐに中断してください。');
 
     saveState('phase2');
     busy=false;
@@ -659,11 +717,19 @@
     }
 
     if(state==='afterTakeover'){
-      return later('先ほどの不正アクセスについて確認しています。何か気づいたことがあれば教えてください。');
+      return later('その間、何かありましたか？');
     }
 
     if(state==='askStolenItem'){
-      return later('ご自宅で、何か無くなっているものがないか確認できますか？');
+      return later('今の時点で、ご自宅から何か無くなっているものに心当たりはありますか？');
+    }
+
+    if(state==='askHomeAbnormality'){
+      return later('今ご自宅の中で、何か普段と違うことはありませんか？');
+    }
+
+    if(state==='askContinuePhase2'){
+      return later('危険を感じていないようであれば、無理のない範囲で新しいページを確認していただけますか？');
     }
 
     if(state==='phase2'){
@@ -767,12 +833,20 @@
       return confirmSquirrelExisting();
     }
 
-    if(state==='afterTakeover' && /怪盗|侵入|家/.test(v)){
+    if(state==='afterTakeover' && /怪しい|人物|会話|誰か/.test(v)){
       return reportPossibleIntrusion();
     }
 
-    if(state==='askStolenItem' && /わから|分から|謎|新しい/.test(v)){
-      return reportNewPuzzle();
+    if(state==='askStolenItem' && /わから|分から|今のところ|ない|ありません/.test(v)){
+      return reportNoKnownMissing();
+    }
+
+    if(state==='askHomeAbnormality' && /特に|ない|ありません|大丈夫/.test(v)){
+      return reportNoHomeAbnormality();
+    }
+
+    if(state==='askContinuePhase2' && /分かりました|確認|やります|はい/.test(v)){
+      return confirmContinuePhase2();
     }
 
     return generic();
@@ -820,14 +894,28 @@
 
     if(state==='afterTakeover'){
       recommendations([
-        ['怪盗が家に侵入したかもしれないです',reportPossibleIntrusion,true]
+        ['怪しい人物と会話しました',reportPossibleIntrusion,true]
       ]);
       return;
     }
 
     if(state==='askStolenItem'){
       recommendations([
-        ['分かりません。新しい謎を渡されました',reportNewPuzzle,true]
+        ['今のところ分かりません',reportNoKnownMissing,true]
+      ]);
+      return;
+    }
+
+    if(state==='askHomeAbnormality'){
+      recommendations([
+        ['今のところ特にありません',reportNoHomeAbnormality,true]
+      ]);
+      return;
+    }
+
+    if(state==='askContinuePhase2'){
+      recommendations([
+        ['分かりました。確認してみます',confirmContinuePhase2,true]
       ]);
     }
   }
