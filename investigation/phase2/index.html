@@ -308,67 +308,166 @@
     }
 
     body.birthday-mode{
+      color:#3f2d35;
       background:
-        radial-gradient(circle at 50% -6%,rgba(255,210,150,.16),transparent 34%),
-        radial-gradient(circle at 12% 18%,rgba(255,145,180,.10),transparent 24%),
-        radial-gradient(circle at 88% 22%,rgba(135,205,255,.10),transparent 27%),
-        linear-gradient(180deg,#100b0d 0%,#0d0b0d 48%,#08090a 100%);
+        radial-gradient(circle at 10% 8%,rgba(255,255,255,.98),transparent 23%),
+        radial-gradient(circle at 88% 12%,rgba(255,246,196,.95),transparent 28%),
+        radial-gradient(circle at 18% 82%,rgba(255,214,232,.92),transparent 34%),
+        radial-gradient(circle at 84% 76%,rgba(211,239,255,.94),transparent 34%),
+        linear-gradient(135deg,#fff8da 0%,#ffe8f1 34%,#e6f5ff 67%,#fff3cf 100%);
+      background-attachment:fixed;
     }
 
     body.birthday-mode::before{
-      opacity:.28;
+      opacity:.18;
+      mix-blend-mode:multiply;
+      background:
+        radial-gradient(circle at 20% 20%,rgba(255,127,161,.16) 0 2px,transparent 3px),
+        radial-gradient(circle at 80% 16%,rgba(94,178,255,.15) 0 2px,transparent 3px),
+        radial-gradient(circle at 70% 78%,rgba(255,194,68,.16) 0 2px,transparent 3px);
+      background-size:42px 42px,54px 54px,62px 62px;
     }
 
     .transmission.birthday-reveal{
-      border-color:#5a4447;
+      border-color:rgba(255,255,255,.94);
       background:
-        linear-gradient(150deg,rgba(255,226,185,.045),transparent 46%),
-        rgba(13,10,12,.91);
+        linear-gradient(145deg,rgba(255,255,255,.94),rgba(255,250,246,.88));
       box-shadow:
-        0 32px 100px rgba(0,0,0,.48),
-        0 0 60px rgba(255,190,145,.045),
-        inset 0 1px 0 rgba(255,255,255,.04);
+        0 28px 80px rgba(121,83,105,.18),
+        0 0 0 6px rgba(255,255,255,.28),
+        inset 0 1px 0 #fff;
+      backdrop-filter:blur(8px);
     }
 
     .birthday-reveal .ending-head{
-      color:#9c7f7f;
+      color:#d55c86;
+      font-weight:800;
+      letter-spacing:.18em;
     }
 
-    .ending-line.birthday{
-      color:#fff3dd;
-      text-shadow:
-        0 0 22px rgba(255,220,175,.20),
-        0 0 48px rgba(255,150,170,.10);
+    .birthday-reveal .ending-line{
+      color:#47313a;
+      text-shadow:none;
+    }
+
+    .birthday-reveal .ending-line.ojisan{
+      color:#7a3e5a;
+      font-weight:650;
+    }
+
+    .birthday-reveal .ending-line.birthday{
+      margin:8px 0 2px;
+      padding:18px 16px;
+      border-radius:18px;
+      color:#c73970;
+      background:
+        linear-gradient(135deg,rgba(255,238,178,.86),rgba(255,220,234,.90),rgba(214,240,255,.90));
+      font-size:clamp(30px,7vw,52px);
+      line-height:1.35;
+      font-weight:950;
+      text-align:center;
+      letter-spacing:.02em;
+      box-shadow:
+        0 12px 28px rgba(199,57,112,.12),
+        inset 0 0 0 1px rgba(255,255,255,.95);
+      text-shadow:0 2px 0 rgba(255,255,255,.92);
     }
 
     .ending-line.birthday-sub{
       font-family:-apple-system,BlinkMacSystemFont,"Noto Sans JP","Yu Gothic",Meiryo,sans-serif;
-      font-size:clamp(21px,4.1vw,31px);
-      font-weight:800;
-      color:#fff1e7;
-      text-shadow:0 0 22px rgba(255,210,180,.13);
+      font-size:clamp(23px,4.5vw,34px);
+      line-height:1.55;
+      font-weight:900;
+      color:#d34f7e;
+      text-align:center;
+      text-shadow:0 2px 0 rgba(255,255,255,.85);
+    }
+
+    .birthday-reveal .ending-line.report{
+      padding:18px 18px 2px;
+      border-top:2px dashed rgba(211,79,126,.28);
+      color:#385a78;
+      font-weight:700;
     }
 
     .ending-line.keyword{
       width:fit-content;
-      margin-top:4px;
-      padding:11px 15px;
-      border:1px dashed #8a6b70;
-      border-radius:3px;
-      background:rgba(255,255,255,.035);
-      color:#fff5e9;
+      margin:6px auto;
+      padding:13px 17px;
+      border:2px dashed #d45c88;
+      border-radius:10px;
+      background:#fff8fc;
+      color:#a62e5d;
       font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
-      font-size:clamp(18px,3.2vw,24px);
-      font-weight:800;
+      font-size:clamp(18px,3.2vw,25px);
+      font-weight:900;
       letter-spacing:.08em;
+      box-shadow:0 8px 22px rgba(166,46,93,.10);
     }
 
     .ending-line.punchline{
       font-family:-apple-system,BlinkMacSystemFont,"Noto Sans JP","Yu Gothic",Meiryo,sans-serif;
-      font-size:clamp(23px,4.8vw,36px);
-      font-weight:900;
-      color:#fff4ea;
-      text-shadow:0 0 22px rgba(255,205,170,.13);
+      font-size:clamp(26px,5vw,40px);
+      font-weight:950;
+      color:#d13f75;
+      text-align:center;
+      text-shadow:0 2px 0 #fff;
+    }
+
+    .celebration-layer{
+      position:fixed;
+      inset:0;
+      z-index:9998;
+      pointer-events:none;
+      overflow:hidden;
+    }
+
+    .confetti{
+      position:absolute;
+      top:-12vh;
+      width:10px;
+      height:18px;
+      border-radius:3px;
+      opacity:.96;
+      animation:confettiFall var(--fall,5.4s) linear var(--delay,0s) forwards;
+      transform:rotate(var(--rot,0deg));
+    }
+
+    @keyframes confettiFall{
+      0%{
+        transform:translate3d(0,-8vh,0) rotate(var(--rot,0deg));
+      }
+      45%{
+        transform:translate3d(var(--drift,30px),48vh,0) rotate(calc(var(--rot,0deg) + 380deg));
+      }
+      100%{
+        transform:translate3d(calc(var(--drift,30px) * -0.35),112vh,0) rotate(calc(var(--rot,0deg) + 760deg));
+      }
+    }
+
+    .birthday-burst{
+      position:fixed;
+      inset:0;
+      z-index:9997;
+      pointer-events:none;
+      opacity:0;
+      background:
+        radial-gradient(circle at center,rgba(255,255,255,1) 0 8%,rgba(255,244,183,.92) 18%,rgba(255,210,230,.52) 42%,transparent 72%);
+    }
+
+    .birthday-burst.active{
+      animation:birthdayBurst 1.05s ease-out forwards;
+    }
+
+    @keyframes birthdayBurst{
+      0%{opacity:0;transform:scale(.74)}
+      20%{opacity:1}
+      100%{opacity:0;transform:scale(1.16)}
+    }
+
+    @media(prefers-reduced-motion:reduce){
+      .confetti{animation:none;display:none}
+      .birthday-burst.active{animation:none;opacity:0}
     }
 
     .glitch-flash{
@@ -452,6 +551,8 @@
   </main>
 
   <div class="glitch-flash" id="glitch-flash" aria-hidden="true"></div>
+  <div class="birthday-burst" id="birthday-burst" aria-hidden="true"></div>
+  <div class="celebration-layer" id="celebration-layer" aria-hidden="true"></div>
 
   <script>
     (() => {
@@ -465,7 +566,10 @@
       const status = document.getElementById('answer-status');
       const transmission = document.querySelector('.transmission');
       const endingLog = document.getElementById('ending-log');
+      const endingHead = document.querySelector('.ending-head');
       const flash = document.getElementById('glitch-flash');
+      const birthdayBurst = document.getElementById('birthday-burst');
+      const celebrationLayer = document.getElementById('celebration-layer');
 
       const normalize = value =>
         String(value || '')
@@ -500,6 +604,37 @@
         flash.classList.remove('active');
       }
 
+      function launchConfetti(){
+        celebrationLayer.innerHTML='';
+        const colors=['#ff5f93','#ffbf3f','#54b7ff','#8d72ff','#54d6a4','#ff875f'];
+        for(let i=0;i<110;i++){
+          const piece=document.createElement('span');
+          piece.className='confetti';
+          piece.style.left=(Math.random()*100)+'vw';
+          piece.style.background=colors[i%colors.length];
+          piece.style.setProperty('--fall',(4.1+Math.random()*3.2)+'s');
+          piece.style.setProperty('--delay',(Math.random()*.65)+'s');
+          piece.style.setProperty('--drift',((-90+Math.random()*180))+'px');
+          piece.style.setProperty('--rot',(Math.random()*180)+'deg');
+          piece.style.width=(7+Math.random()*7)+'px';
+          piece.style.height=(10+Math.random()*13)+'px';
+          celebrationLayer.appendChild(piece);
+        }
+        setTimeout(()=>{ celebrationLayer.innerHTML=''; },8500);
+      }
+
+      function enterBirthdayMode(){
+        document.body.classList.add('birthday-mode');
+        transmission.classList.add('birthday-reveal');
+        endingHead.textContent='🎉 BIRTHDAY MODE 🎉';
+
+        birthdayBurst.classList.remove('active');
+        void birthdayBurst.offsetWidth;
+        birthdayBurst.classList.add('active');
+
+        launchConfetti();
+      }
+
       async function runEnding(){
         transmission.classList.add('ending');
 
@@ -512,9 +647,8 @@
 
         // ここで事件モードを終わらせ、誕生日サプライズへ切り替える。
         await glitch();
-        document.body.classList.add('birthday-mode');
-        transmission.classList.add('birthday-reveal');
-        await wait(350);
+        enterBirthdayMode();
+        await wait(650);
 
         await addLine('🎉🎂 HAPPY BIRTHDAY 🎂🎉','birthday');
         await addLine('30歳、おめでとう〜〜〜‼️🥳✨✨✨','birthday-sub');
