@@ -6,20 +6,322 @@
   <meta name="robots" content="noindex,nofollow">
   <title>NEXT PUZZLE</title>
   <style>
-    *{box-sizing:border-box}html,body{min-height:100%}
-    body{margin:0;display:grid;place-items:center;padding:24px;background:#08090b;color:#e6e6e6;
-      font-family:-apple-system,BlinkMacSystemFont,"Noto Sans JP","Yu Gothic UI",Meiryo,sans-serif}
-    main{width:min(520px,100%);padding:32px;border:1px solid #2d3238;background:#0e1013}
-    small{color:#737b84;letter-spacing:.16em}
-    h1{font-size:24px;font-weight:600;margin:20px 0 14px}
-    p{color:#aeb4ba;line-height:1.8}
+    *{box-sizing:border-box}
+    html,body{min-height:100%}
+    html{background:#030405}
+
+    body{
+      margin:0;
+      min-height:100vh;
+      color:#eceeef;
+      background:
+        radial-gradient(circle at 50% -10%,rgba(55,63,72,.14),transparent 42%),
+        linear-gradient(180deg,#030405 0%,#080a0c 48%,#030405 100%);
+      font-family:"Noto Serif JP","Yu Mincho","Hiragino Mincho ProN",serif;
+      overflow-x:hidden;
+    }
+
+    body::before{
+      content:"";
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      opacity:.18;
+      background:
+        repeating-linear-gradient(
+          0deg,
+          transparent 0 3px,
+          rgba(255,255,255,.018) 3px 4px
+        ),
+        radial-gradient(
+          circle at 30% 20%,
+          rgba(255,255,255,.025) 0 1px,
+          transparent 1px 100%
+        );
+      background-size:auto,8px 8px;
+      mix-blend-mode:screen;
+    }
+
+    .wrap{
+      position:relative;
+      z-index:1;
+      width:min(760px,100%);
+      margin:0 auto;
+      padding:54px 18px 76px;
+    }
+
+    .transmission{
+      border:1px solid #1a2025;
+      background:
+        linear-gradient(150deg,rgba(255,255,255,.012),transparent 46%),
+        rgba(7,9,11,.86);
+      box-shadow:
+        0 32px 100px rgba(0,0,0,.5),
+        inset 0 1px 0 rgba(255,255,255,.018);
+      padding:52px 42px 50px;
+    }
+
+    .meta{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      margin-bottom:40px;
+      color:#59636c;
+      font:10px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+      letter-spacing:.22em;
+      text-transform:uppercase;
+    }
+
+    .meta::before{
+      content:"";
+      width:6px;
+      height:6px;
+      border-radius:50%;
+      background:#6c222b;
+      box-shadow:0 0 12px rgba(108,34,43,.65);
+      animation:pulse 2.6s ease-in-out infinite;
+    }
+
+    @keyframes pulse{
+      0%,100%{opacity:.3}
+      50%{opacity:1}
+    }
+
+    .poem{
+      margin:0;
+      font-size:clamp(20px,3.8vw,29px);
+      line-height:2.15;
+      letter-spacing:.065em;
+      font-weight:400;
+      text-wrap:pretty;
+    }
+
+    .stanza{
+      display:block;
+      margin:0 0 34px;
+      opacity:0;
+      transform:translateY(8px);
+      animation:reveal .7s ease forwards;
+    }
+
+    .stanza:nth-child(1){animation-delay:.10s}
+    .stanza:nth-child(2){animation-delay:.35s}
+    .stanza:nth-child(3){animation-delay:.60s}
+    .stanza:last-child{margin-bottom:0}
+
+    @keyframes reveal{
+      to{
+        opacity:1;
+        transform:none;
+      }
+    }
+
+    .poem strong{
+      font-weight:500;
+      color:#f3f4f5;
+    }
+
+    .latin{
+      font-family:Georgia,"Times New Roman",serif;
+      letter-spacing:.035em;
+    }
+
+    .divider{
+      width:52px;
+      height:1px;
+      margin:46px 0 34px;
+      background:linear-gradient(90deg,#3d444b,transparent);
+    }
+
+    .final-label{
+      margin:0 0 9px;
+      color:#56616a;
+      font:10px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+      letter-spacing:.2em;
+      text-transform:uppercase;
+    }
+
+    .final-copy{
+      margin:0 0 18px;
+      color:#8b949c;
+      font-size:13px;
+      line-height:1.8;
+      letter-spacing:.035em;
+    }
+
+    .answer-form{
+      display:grid;
+      grid-template-columns:minmax(0,1fr) auto;
+      gap:10px;
+      align-items:stretch;
+    }
+
+    .answer-form input{
+      width:100%;
+      min-width:0;
+      border:1px solid #2b333a;
+      border-radius:2px;
+      outline:none;
+      padding:14px 15px;
+      color:#f1f2f3;
+      background:#050708;
+      font:600 16px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      transition:border-color .18s,box-shadow .18s,background .18s;
+    }
+
+    .answer-form input:focus{
+      border-color:#56626c;
+      background:#080b0d;
+      box-shadow:0 0 0 3px rgba(86,98,108,.09);
+    }
+
+    .answer-form button{
+      border:1px solid #313941;
+      border-radius:2px;
+      padding:0 18px;
+      color:#d7dadd;
+      background:#11161a;
+      font:600 11px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+      letter-spacing:.16em;
+      cursor:pointer;
+      transition:background .18s,border-color .18s,color .18s;
+    }
+
+    .answer-form button:hover{
+      background:#181e23;
+      border-color:#4a555f;
+      color:#fff;
+    }
+
+    .answer-status{
+      min-height:24px;
+      margin:10px 0 0;
+      color:#6f7880;
+      font:11px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+      letter-spacing:.08em;
+    }
+
+    .answer-status.error{color:#8a5057}
+
+    .foot{
+      margin:34px 0 0;
+      color:#3f474e;
+      font:9px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+      letter-spacing:.18em;
+    }
+
+    @media(max-width:580px){
+      .wrap{padding:20px 12px 48px}
+      .transmission{padding:38px 24px 40px}
+      .meta{margin-bottom:30px}
+      .poem{line-height:2}
+      .stanza{margin-bottom:28px}
+      .answer-form{grid-template-columns:1fr}
+      .answer-form button{min-height:46px}
+    }
+
+    @media(prefers-reduced-motion:reduce){
+      .stanza,.meta::before{animation:none}
+      .stanza{opacity:1;transform:none}
+    }
   </style>
 </head>
+
 <body>
-  <main>
-    <small>DEBUG PLACEHOLDER</small>
-    <h1>NEXT PUZZLE</h1>
-    <p>後半の家謎ページは、次の設計フェーズでここに実装します。</p>
+  <main class="wrap">
+    <section class="transmission">
+      <div class="meta">NEXT PUZZLE / PRIVATE TRANSMISSION</div>
+
+      <div class="poem" aria-label="次の謎">
+        <span class="stanza">
+          十一の獣が並ぶ場所。<br>
+          まずは、その群れの下へ。
+        </span>
+
+        <span class="stanza">
+          次は、三と四の秩序に並ぶ<br>
+          十二の黒き盤の下。
+        </span>
+
+        <span class="stanza">
+          そして最後に、<span class="latin">Karl Blossfeldt</span>。<br>
+          もの言わぬ命を、光の中に閉じ込めた男。<br>
+          その一枚を纏う箱の中を探せ。
+        </span>
+      </div>
+
+      <div class="divider"></div>
+
+      <p class="final-label">FINAL ANSWER</p>
+      <p class="final-copy">
+        三つの場所で見つけたものから、最後の答えを導け。
+      </p>
+
+      <form class="answer-form" id="final-answer-form">
+        <input
+          id="final-answer"
+          type="text"
+          autocomplete="off"
+          autocapitalize="characters"
+          spellcheck="false"
+          placeholder="ENTER ANSWER"
+          aria-label="最終回答"
+        >
+        <button type="submit">ANSWER</button>
+      </form>
+
+      <p class="answer-status" id="answer-status" aria-live="polite"></p>
+
+      <p class="foot">THREE PLACES / ONE ANSWER</p>
+    </section>
   </main>
+
+  <script>
+    (() => {
+      // 最終キーワードは未確定。
+      // 決定後、この配列に正解を追加すれば判定可能。
+      const FINAL_ANSWERS = [];
+
+      const form = document.getElementById('final-answer-form');
+      const input = document.getElementById('final-answer');
+      const status = document.getElementById('answer-status');
+
+      const normalize = value =>
+        String(value || '')
+          .trim()
+          .replace(/[\s　_-]/g, '')
+          .toUpperCase();
+
+      form.addEventListener('submit', event => {
+        event.preventDefault();
+
+        const value = normalize(input.value);
+
+        if (!value) {
+          status.className = 'answer-status error';
+          status.textContent = '答えを入力せよ。';
+          return;
+        }
+
+        if (!FINAL_ANSWERS.length) {
+          status.className = 'answer-status';
+          status.textContent = '……';
+          return;
+        }
+
+        if (FINAL_ANSWERS.map(normalize).includes(value)) {
+          status.className = 'answer-status';
+          status.textContent = '正解。';
+          // エンディングURL確定後、ここで遷移させる。
+          return;
+        }
+
+        status.className = 'answer-status error';
+        status.textContent = '違う。もう一度考えろ。';
+      });
+    })();
+  </script>
 </body>
 </html>
