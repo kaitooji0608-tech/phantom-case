@@ -468,3 +468,66 @@ button{cursor:pointer}
   .bubble{font-size:14px;padding:9px 12px}
   .chat-header__dept{max-width:220px}
 }
+
+
+/* v27: first hijack / UNKNOWN USER */
+.message-row.unknown .chat-avatar{
+  background:#181b1f;
+  color:#e7e9eb;
+  border:1px solid #4a5057;
+}
+.message-row.unknown .sender-name,
+.typing-row.unknown .typing-name{
+  color:#606872;
+  letter-spacing:.06em;
+}
+.message-row.unknown .bubble{
+  background:#16191d;
+  color:#f0f0f0;
+  border:1px solid #343a41;
+  box-shadow:0 6px 18px rgba(0,0,0,.12);
+}
+.takeover-overlay{
+  position:fixed;
+  inset:0;
+  z-index:99999;
+  pointer-events:none;
+  opacity:0;
+  background:#000;
+}
+.takeover-overlay.active{opacity:1}
+.takeover-overlay.blackout{background:#000}
+.takeover-overlay.static{
+  background:#090909;
+  overflow:hidden;
+}
+.takeover-overlay.static .takeover-static{
+  position:absolute;
+  inset:-35%;
+  opacity:.95;
+  background:
+    repeating-radial-gradient(circle at 17% 43%,rgba(255,255,255,.8) 0 1px,rgba(0,0,0,.9) 1px 3px),
+    repeating-linear-gradient(0deg,rgba(255,255,255,.16) 0 1px,rgba(0,0,0,.28) 1px 4px);
+  background-size:7px 7px,100% 5px;
+  animation:takeoverNoise .075s steps(2,end) infinite;
+}
+.takeover-overlay.static::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:
+    linear-gradient(transparent 0 46%,rgba(255,255,255,.2) 47%,rgba(0,0,0,.6) 50%,transparent 53%),
+    repeating-linear-gradient(0deg,transparent 0 3px,rgba(255,255,255,.035) 3px 4px);
+  animation:takeoverScan .16s linear infinite;
+}
+@keyframes takeoverNoise{
+  0%{transform:translate3d(-3%,2%,0) scale(1.02)}
+  25%{transform:translate3d(4%,-3%,0) scale(1.06)}
+  50%{transform:translate3d(-1%,5%,0) scale(1.04)}
+  75%{transform:translate3d(5%,1%,0) scale(1.08)}
+  100%{transform:translate3d(-4%,-4%,0) scale(1.03)}
+}
+@keyframes takeoverScan{
+  from{transform:translateY(-18%)}
+  to{transform:translateY(18%)}
+}

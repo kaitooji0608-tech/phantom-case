@@ -10,9 +10,9 @@
   const STATUS_TEXT=document.getElementById('connect-status-text');
   const PROGRESS=document.getElementById('connect-progress-bar');
 
-  const STATE_KEY='phantomPoliceMainChatV7State';
-  const DECLINE_KEY='phantomPoliceMainChatV7Declines';
-  const LOG_KEY='phantomPoliceMainChatV7Log';
+  const STATE_KEY='phantomPoliceMainChatV8State';
+  const DECLINE_KEY='phantomPoliceMainChatV8Declines';
+  const LOG_KEY='phantomPoliceMainChatV8Log';
   const INTRO_KEY='phantomSecureChatIntroSeenV1';
 
   let state=localStorage.getItem(STATE_KEY)||'start';
@@ -78,15 +78,17 @@
       row.className='message-row '+(
         item.role==='user'
           ?'mine'
-          :item.role==='ojisan'
-            ?'ojisan'
-            :'aizawa'
+          :item.role==='unknown'
+            ?'unknown'
+            :item.role==='ojisan'
+              ?'ojisan'
+              :'aizawa'
       );
 
       if(item.role!=='user'){
         const avatar=document.createElement('div');
         avatar.className='chat-avatar';
-        avatar.textContent=item.role==='ojisan'?'？':'相';
+        avatar.textContent=(item.role==='ojisan'||item.role==='unknown')?'？':'相';
         row.appendChild(avatar);
       }
 
@@ -96,9 +98,11 @@
       if(item.role!=='user'){
         const name=document.createElement('div');
         name.className='sender-name';
-        name.textContent=item.role==='ojisan'
-          ?'未登録ユーザー'
-          :'相沢 直人';
+        name.textContent=item.role==='unknown'
+          ?'UNKNOWN USER'
+          :item.role==='ojisan'
+            ?'未登録ユーザー'
+            :'相沢 直人';
         stack.appendChild(name);
       }
 
@@ -135,7 +139,7 @@
       .replace(/&gt;/g,'>')
       .trim();
 
-    if(role==='aizawa' || role==='ojisan'){
+    if(role==='aizawa' || role==='ojisan' || role==='unknown'){
       lastReadableChars=plain.length;
       lastRole=role;
     }else{
@@ -160,8 +164,12 @@
   function showTyping(role='aizawa'){
     clearTyping();
 
-    const name=role==='ojisan'?'未登録ユーザー':'相沢 直人';
-    const av=role==='ojisan'?'？':'相';
+    const name=role==='unknown'
+      ?'UNKNOWN USER'
+      :role==='ojisan'
+        ?'未登録ユーザー'
+        :'相沢 直人';
+    const av=(role==='ojisan'||role==='unknown')?'？':'相';
 
     const row=document.createElement('div');
     row.className='typing-row';
@@ -177,13 +185,17 @@
   }
 
   function wait(ms){
+    return new Promise(r=>setTimeout(r,DEBUG_NO_DELAY?0:ms));
+  }
+
+  function fxWait(ms){
     return new Promise(r=>setTimeout(r,ms));
   }
 
   function readingDelay(){
     // 連続する相沢／おじさんの発言では、
     // 直前の吹き出しを読む時間に2秒を足す。
-    if(lastRole==='aizawa' || lastRole==='ojisan'){
+    if(lastRole==='aizawa' || lastRole==='ojisan' || lastRole==='unknown'){
       const readingMs=(lastReadableChars/READING_CHARS_PER_SEC)*1000;
       return Math.max(
         MIN_CHAT_DELAY_MS,
@@ -255,10 +267,56 @@
     return repoRoot()+'investigation/';
   }
 
+  function phase2URL(){
+    return repoRoot()+'investigation/phase2/';
+  }
+
   function namedLink(url,label){
     const safeURL=escapeHTML(url);
     const safeLabel=escapeHTML(label);
     return '<a href="'+safeURL+'" target="_blank" rel="noopener noreferrer">'+safeLabel+'</a>';
+  }
+
+  function takeoverOverlay(){
+    let overlay=document.getElementById('takeover-overlay');
+    if(overlay)return overlay;
+
+    overlay=document.createElement('div');
+    overlay.id='takeover-overlay';
+    overlay.className='takeover-overlay';
+    overlay.setAttribute('aria-hidden','true');
+    overlay.innerHTML='<div class="takeover-static"></div>';
+    document.body.appendChild(overlay);
+    return overlay;
+  }
+
+  async function takeoverEffect(){
+    const overlay=takeoverOverlay();
+
+    overlay.className='takeover-overlay active blackout';
+    await fxWait(260);
+
+    overlay.className='takeover-overlay active static';
+    await fxWait(900);
+
+    overlay.className='takeover-overlay active blackout';
+    await fxWait(220);
+
+    overlay.className='takeover-overlay';
+    await fxWait(100);
+  }
+
+  async function restoreEffect(){
+    const overlay=takeoverOverlay();
+
+    overlay.className='takeover-overlay active static';
+    await fxWait(520);
+
+    overlay.className='takeover-overlay active blackout';
+    await fxWait(180);
+
+    overlay.className='takeover-overlay';
+    await fxWait(100);
   }
 
   function normalize(v){
@@ -434,133 +492,149 @@
     busy=false;
   }
 
-  async function acceptCodeword(){
+  async function receiveGlitch(){
     busy=true;
     clearActions();
-    saveState('reported');
 
-    await later('分かりました。ありがとうございます。');
-    await later('先ほどのページを進めた先で、その言葉が表示されたということですね。');
-    await later('こちらでも記録しておきます。');
+    await later('「GLITCH」……ですか？');
+    await later('怪盗グリッチのことでしょうか。');
+    await later('あ、ちょっと待ってください。');
 
-    await wait(1200);
-    addSystem('通信経路に未登録の接続を検知しました');
+    await later('今、確認が取れました。');
+    await later('実は、今回ご協力をお願いしている別の方からも、先ほどページの解読が完了したとの報告が入っています。');
+    await later('ただ、その方の画面にも最後に「リスの置物の下を調べろ」と表示されたそうなんですが……。');
+    await later('何のことなのか分からない、ということでして。');
+    await later('どこのリスの置物なんでしょう……。');
 
-    await later(
-      '……すみません。今、こちらの画面に見慣れない接続表示が出ています。',
-      1000
-    );
-
-    await later(
-      'ちゃんと伝えてくれたネ〜😏♪',
-      1100,
-      'ojisan'
-    );
-
-    await later(
-      '警察さんもビックリしてるんじゃないカナ〜？',
-      1350,
-      'ojisan'
-    );
-
-    await later(
-      'でも、まだ終わりじゃないヨ♪',
-      1350,
-      'ojisan'
-    );
-
-    addMessage(
-      '<a href="../mission/house/">次の手がかり</a>',
-      'ojisan'
-    );
+    saveState('askSquirrelQR');
+    recommendations([
+      ['リスの置物の下から、QRコードを見つけました',reportSquirrelQR,true]
+    ]);
 
     busy=false;
   }
 
-  async function report(){
-    if(state==='reported'||state==='squirrelReported')return;
-
+  async function reportSquirrelQR(){
     busy=true;
     clearActions();
-    saveState('reported');
 
-    addUser('調査結果を相沢さんに報告する');
+    await later('え、リスの置物の下からQRコードを見つけたんですか！？');
+    await later('そのリスの置物は、どこにあったんですか？');
 
-    await later(
-      'お疲れさまでした。少々お待ちください、照合結果を確認します。',
-      1000
-    );
-
-    await later('……確認できました。5件とも一致しています。');
-
-    await later(
-      '本部内部の記録に関する内容も含まれていますので、私の方で判断せず、担当部署へそのまま共有します。'
-    );
-
-    await later(
-      'ご協力ありがとうございました。今回お願いしていた調査は、これで——'
-    );
-
-    await wait(900);
-
-    addSystem('通信経路に未登録の接続を検知しました');
-
-    await later(
-      '……すみません。今、こちらの画面に見慣れない接続表示が出ています。',
-      1000
-    );
-
-    await later(
-      'やっほ〜😏　警察さんのお手伝い、おつかれサマ〜♪',
-      1100,
-      'ojisan'
-    );
-
-    await later(
-      '相変わらずマジメだネ〜。でも、まだ終わりじゃないヨ。',
-      1500,
-      'ojisan'
-    );
-
-    await later(
-      '次はパソコンばっかり見てないで、お家の中を使って遊ぼっか🏠✨',
-      1700,
-      'ojisan'
-    );
-
-    addMessage(
-      '<a href="../mission/house/">../police/mission/house/</a>',
-      'ojisan'
-    );
+    saveState('askSquirrelWhere');
+    recommendations([
+      ['私の家です',reportSquirrelHome,true]
+    ]);
 
     busy=false;
   }
 
-  async function squirrel(){
+  async function reportSquirrelHome(){
     busy=true;
     clearActions();
-    saveState('squirrelReported');
 
-    addUser('家の中で見つけたものを相沢さんに報告する');
+    await later('……え？');
+    await later('あなたの家ですか？');
 
-    await later('お戻りですね。何か見つかったんですか？',850);
-    await later('……「リス」ですか？');
-    await later('少々待ってください。先ほど表示された追加指示は、こちらから送信したものではありません。');
-    await later('もし、その指示をたどって実際にご自宅の中で何かを見つけたのであれば……');
-    await later('誰かが、あなたの家の中に入った可能性があります。',1800);
+    await later('すみません、少し確認させてください。');
+    await later('そのリスの置物は、今回の件が始まる前から、ご自宅にあったものですか？');
 
-    await wait(800);
-    addSystem('通信経路に未登録の接続を検知しました');
+    saveState('askSquirrelExisting');
+    recommendations([
+      ['はい',confirmSquirrelExisting,true]
+    ]);
 
-    await later('あ、バレちゃった！？😳',850,'ojisan');
-    await later('そんな怖い顔しないでヨ〜。何にも盗んでないってば‼️',1350,'ojisan');
-    await later('せっかくだから、もう少しだけ遊ぼっか♪',1350,'ojisan');
+    busy=false;
+  }
 
-    addMessage(
-      '<a href="../mission/trace/">../police/mission/trace/</a>',
-      'ojisan'
-    );
+  async function confirmSquirrelExisting(){
+    busy=true;
+    clearActions();
 
+    await later('……そうですか。');
+    await later('だとすると、少し話が変わってきます。');
+
+    await later('他の方にも同じ「リスの置物の下を調べろ」という表示が出ている。');
+    await later('でも、その指示に実際に該当するものが見つかったのは、今のところあなただけです。');
+    await later('もしかすると、ここから先は不特定多数に向けたものではなく、あなた個人に向けて用意された予告状なのかもしれません。');
+
+    await later('それと、もう一点気になります。');
+    await later('相手は、あなたのご自宅に「リスの置物」があることを知っていた。');
+    await later('そして、その下にQRコードが置かれていた。');
+    await later('もし、そのQRコードが最近置かれたものだとすれば……');
+    await later('誰かがご自宅の中に入った可能性も考えなくてはいけません。');
+
+    await later('念のため、玄関や窓などに——');
+
+    saveState('takeover');
+    await takeoverSequence();
+
+    busy=false;
+  }
+
+  async function takeoverSequence(){
+    clearActions();
+    clearTyping();
+
+    await takeoverEffect();
+
+    await later('よく分かったな。',null,'unknown');
+    await later('これは、お前に向けた予告状だ。',null,'unknown');
+    await later('最近、引っ越したらしいな。',null,'unknown');
+    await later('新しい城は、なかなか立派じゃないか。',null,'unknown');
+    await later('お前の大切なものを、一つ預かった。',null,'unknown');
+    await later('返してほしければ、残りの謎も解いてみろ。',null,'unknown');
+    await later('次はここだ。',null,'unknown');
+
+    addMessage(namedLink(phase2URL(),'NEXT PUZZLE'),'unknown');
+
+    await later('せいぜい、楽しませてくれ。',null,'unknown');
+
+    await restoreEffect();
+
+    await later('……すみません。');
+    await later('今、何者かによる不正アクセスで、通信が一時的に乗っ取られていました。');
+    await later('こちらから操作できない状態になっていました。');
+
+    saveState('afterTakeover');
+    recommendations([
+      ['怪盗が家に侵入したかもしれないです',reportPossibleIntrusion,true]
+    ]);
+  }
+
+  async function reportPossibleIntrusion(){
+    busy=true;
+    clearActions();
+
+    await later('……怪盗が、ですか？');
+    await later('さっきの「新しい城」という発言もありましたし、可能性は否定できません。');
+    await later('何か盗まれたものはありますか？');
+
+    saveState('askStolenItem');
+    recommendations([
+      ['分かりません。新しい謎を渡されました',reportNewPuzzle,true]
+    ]);
+
+    busy=false;
+  }
+
+  async function reportNewPuzzle(){
+    busy=true;
+    clearActions();
+
+    await later('新しい謎……ですか。');
+    await later('分かりました。');
+
+    await later('こちらでも、先ほどの不正アクセスと、ご自宅への侵入の可能性について確認を進めます。');
+    await later('それと、先ほどあなたが解いてくださった内容についても、現在本部内で確認が始まっています。');
+    await later('過去の記録と食い違う情報が複数見つかっていて、こちらも少し状況が錯綜しています。');
+
+    await later('ただ、今送られてきたページも、今回の相手につながる重要な手掛かりになる可能性があります。');
+    await later('ご自宅の戸締まりなどに異常がなく、危険を感じないようであれば、無理のない範囲で確認をお願いできますか？');
+    await later('こちらでも並行して調べます。');
+    await later('何か異常を感じたら、その時点ですぐに中断してください。');
+
+    saveState('phase2');
     busy=false;
   }
 
@@ -572,18 +646,28 @@
       );
     }
 
-    if(state==='reported'){
-      return later(
-        '先ほどの未登録接続について確認しています。表示された指示には十分注意してください。',
-        760
-      );
+    if(state==='askSquirrelQR'){
+      return later('「リスの置物の下を調べろ」という表示について、何か心当たりはありますか？');
     }
 
-    if(state==='squirrelReported'){
-      return later(
-        '安全のため、周囲を確認しながら進めてください。',
-        760
-      );
+    if(state==='askSquirrelWhere'){
+      return later('そのリスの置物がどこにあったものなのか、教えてください。');
+    }
+
+    if(state==='askSquirrelExisting'){
+      return later('そのリスの置物は、今回の件より前からご自宅にあったものですか？');
+    }
+
+    if(state==='afterTakeover'){
+      return later('先ほどの不正アクセスについて確認しています。何か気づいたことがあれば教えてください。');
+    }
+
+    if(state==='askStolenItem'){
+      return later('ご自宅で、何か無くなっているものがないか確認できますか？');
+    }
+
+    if(state==='phase2'){
+      return later('こちらでも並行して確認を進めています。何か異常を感じた場合は、すぐに中断してください。');
     }
 
     return later('ありがとうございます。確認します。',700);
@@ -667,27 +751,28 @@
       return;
     }
 
-    if(state==='mission' && normalize(v).toUpperCase()==='NEXORA'){
-      busy=true;
-      await later('「NEXORA」……ですか？');
-      await later('それは、先ほどお送りしたページを進めた先で表示された言葉ですか？');
-      saveState('codewordConfirm');
-      recommendations([
-        ['はい',acceptCodeword,true]
-      ]);
-      busy=false;
-      return;
+    if(state==='mission' && normalize(v).toUpperCase()==='GLITCH'){
+      return receiveGlitch();
     }
 
-    if(state==='codewordConfirm'){
-      if(/はい|そう|そうです|yes/i.test(v)){
-        return acceptCodeword();
-      }
-      await later('先ほどのページを進めた先で表示された言葉かどうか、確認させてください。');
-      recommendations([
-        ['はい',acceptCodeword,true]
-      ]);
-      return;
+    if(state==='askSquirrelQR' && /QR|リス|見つけ/.test(v)){
+      return reportSquirrelQR();
+    }
+
+    if(state==='askSquirrelWhere' && /家|自宅|うち/.test(v)){
+      return reportSquirrelHome();
+    }
+
+    if(state==='askSquirrelExisting' && /はい|そう|前から|以前から/.test(v)){
+      return confirmSquirrelExisting();
+    }
+
+    if(state==='afterTakeover' && /怪盗|侵入|家/.test(v)){
+      return reportPossibleIntrusion();
+    }
+
+    if(state==='askStolenItem' && /わから|分から|謎|新しい/.test(v)){
+      return reportNewPuzzle();
     }
 
     return generic();
@@ -712,9 +797,37 @@
       return;
     }
 
-    if(state==='codewordConfirm'){
+    if(state==='askSquirrelQR'){
       recommendations([
-        ['はい',acceptCodeword,true]
+        ['リスの置物の下から、QRコードを見つけました',reportSquirrelQR,true]
+      ]);
+      return;
+    }
+
+    if(state==='askSquirrelWhere'){
+      recommendations([
+        ['私の家です',reportSquirrelHome,true]
+      ]);
+      return;
+    }
+
+    if(state==='askSquirrelExisting'){
+      recommendations([
+        ['はい',confirmSquirrelExisting,true]
+      ]);
+      return;
+    }
+
+    if(state==='afterTakeover'){
+      recommendations([
+        ['怪盗が家に侵入したかもしれないです',reportPossibleIntrusion,true]
+      ]);
+      return;
+    }
+
+    if(state==='askStolenItem'){
+      recommendations([
+        ['分かりません。新しい謎を渡されました',reportNewPuzzle,true]
       ]);
     }
   }
@@ -725,6 +838,7 @@
     });
 
     localStorage.removeItem('phantomPolicePuzzleComplete');
+    localStorage.removeItem('phantomPolicePuzzle');
 
     state='start';
     declineCount=0;
@@ -804,17 +918,6 @@
     return;
   }
 
-  if(qs.get('report')==='1'){
-    showApp();
-    setTimeout(report,300);
-    return;
-  }
-
-  if(qs.get('squirrel')==='1'){
-    showApp();
-    setTimeout(squirrel,300);
-    return;
-  }
 
   const forceIntro=qs.get('intro')==='1';
   const introSeen=localStorage.getItem(INTRO_KEY)==='1';
