@@ -531,3 +531,77 @@ button{cursor:pointer}
   from{transform:translateY(-18%)}
   to{transform:translateY(18%)}
 }
+
+
+/* v35: secure chat closing / read-only ending */
+.session-closed{
+  position:absolute;
+  inset:0;
+  z-index:120;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:24px;
+  background:
+    radial-gradient(circle at 50% 35%,rgba(34,45,54,.13),transparent 42%),
+    rgba(4,7,9,.96);
+  opacity:0;
+  animation:sessionClosedFade .55s ease forwards;
+}
+.session-closed[hidden]{display:none}
+.session-closed-inner{
+  width:min(520px,100%);
+  text-align:center;
+}
+.closed-kicker{
+  margin-bottom:20px;
+  color:#64717a;
+  font:10px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  letter-spacing:.22em;
+}
+.close-status{
+  min-height:34px;
+  color:#edf0f2;
+  font:600 18px ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  letter-spacing:.08em;
+}
+.closed-final-text{
+  margin-top:16px;
+  color:#9ba5ad;
+  font-size:13px;
+  line-height:1.9;
+}
+.closed-note{
+  margin-top:28px;
+  color:#56616a;
+  font-size:11px;
+  letter-spacing:.04em;
+}
+.closing-session{
+  animation:chatDimOut .55s ease forwards;
+}
+.session-is-closed .composer,
+.session-is-closed form.composer,
+.session-is-closed #composer{
+  display:none!important;
+}
+.session-is-closed #messages{
+  overflow-y:auto;
+}
+.session-closed.restored{
+  position:relative;
+  inset:auto;
+  min-height:260px;
+  margin:0;
+  animation:none;
+  opacity:1;
+  border-top:1px solid #172027;
+}
+@keyframes chatDimOut{
+  from{filter:none}
+  to{filter:brightness(.28)}
+}
+@keyframes sessionClosedFade{
+  from{opacity:0}
+  to{opacity:1}
+}

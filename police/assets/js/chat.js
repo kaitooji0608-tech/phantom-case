@@ -10,9 +10,9 @@
   const STATUS_TEXT=document.getElementById('connect-status-text');
   const PROGRESS=document.getElementById('connect-progress-bar');
 
-  const STATE_KEY='phantomPoliceMainChatV10State';
-  const DECLINE_KEY='phantomPoliceMainChatV10Declines';
-  const LOG_KEY='phantomPoliceMainChatV10Log';
+  const STATE_KEY='phantomPoliceMainChatV11State';
+  const DECLINE_KEY='phantomPoliceMainChatV11Declines';
+  const LOG_KEY='phantomPoliceMainChatV11Log';
   const INTRO_KEY='phantomSecureChatIntroSeenV1';
 
   let state=localStorage.getItem(STATE_KEY)||'start';
@@ -701,48 +701,95 @@
     busy=true;
     clearActions();
 
-    await later('全部解けたんですね。');
-    await later('お疲れさまでした。');
-    await later('その後、ご自宅に何か異常はありませんか？');
+    await later('え、全部解けたんですか！？');
+    await later('ちょっと待ってください、本当に全部ですか？');
+    await later('すみません、少し確認させてください。');
 
-    saveState('finalCheckHome');
+    // DEBUGでもここだけ「確認している間」を見せる
+    await fxWait(1800);
+
+    await later('……本当だ。');
+    await later('すごいですね。');
+    await later('正直、こちらもまだ整理しきれていないところがあるのに……。');
+    await later('ログと通信記録も確認しました。');
+    await later('怪盗ヘンタイおじさんの仕業だったんですね。');
+    await later('……毎回、人騒がせな怪盗ですね（笑）');
+    await later('それで、結局何か盗まれたものはありましたか？');
+
+    saveState('finalAskStolen');
     recommendations([
-      ['今のところ特にありません',finalHomeSafe,true]
+      ['特にありませんでした',finalNothingStolen,true]
     ]);
 
     busy=false;
   }
 
-  async function finalHomeSafe(){
+  async function finalNothingStolen(){
     busy=true;
     clearActions();
 
-    await later('分かりました。ひとまず安心しました。');
-    await later('相手が何者だったのか、何か分かりましたか？');
+    await later('よかったです。');
+    await later('それを聞いて安心しました。');
+    await later('では、今回の一連の件については、ひとまずケースクローズとさせてください。');
+    await later('本当に、最初から最後までご協力いただいてありがとうございました。');
 
-    saveState('finalAskIdentity');
-    recommendations([
-      ['怪盗ヘンタイおじさんでした',finalRevealIdentity,true]
-    ]);
+    await later('……もっとも、こちらはまだ全然終わってないんですけどね（笑）');
+    await later('誤認逮捕の可能性がある案件だったり、記録の食い違いだったり、不自然なアクセス履歴だったり……。');
+    await later('あなた方が見つけてくださったものが多すぎて、今、本部は事実確認で大忙しです。');
+    await later('まあ、何とかします（笑）');
+
+    await later('あ、小日向さんから呼ばれてる……。');
+    await later('すみません、僕もそろそろ行かないといけません。');
+    await later('改めて、本当にありがとうございました。');
+
+    saveState('closing');
+    await closeSecureChat();
 
     busy=false;
   }
 
-  async function finalRevealIdentity(){
-    busy=true;
+  async function closeSecureChat(){
     clearActions();
+    clearTyping();
 
-    await later('……怪盗ヘンタイおじさん、ですか。');
-    await later('なるほど……。');
-    await later('では、「GLITCH」という言葉も、別の怪盗の名前を使った偽装だった可能性が高そうですね。');
-    await later('この点も含め、先ほどの通信記録はこちらで確認します。');
+    await fxWait(1200);
+    addSystem('相沢 直人が通信を終了しました');
 
-    await later('それと、先ほどのページであなた方が発見した内容についても、本部で引き続き事実確認を進めています。');
-    await later('長時間、捜査にご協力いただき本当にありがとうございました。');
-    await later('何より、ご無事でよかったです。');
+    await fxWait(1200);
+
+    const app=document.getElementById('app');
+    const closed=document.getElementById('session-closed');
+
+    if(app)app.classList.add('closing-session');
+    if(closed)closed.hidden=false;
+
+    const status=document.getElementById('close-status');
+    const lines=[
+      '通信経路を切断しています…',
+      '暗号化セッションを終了しています…',
+      '通信記録を保護しています…'
+    ];
+
+    for(const line of lines){
+      if(status)status.textContent=line;
+      await fxWait(700);
+    }
+
+    if(status)status.textContent='SESSION CLOSED';
+    await fxWait(600);
+
+    if(app)app.classList.remove('closing-session');
+    document.body.classList.add('session-is-closed');
+
+    const composer=document.querySelector('.composer');
+    if(composer)composer.style.display='none';
+
+    const finalText=document.getElementById('closed-final-text');
+    if(finalText){
+      finalText.textContent='怪盗関連事件特別捜査本部との通信は終了しました。';
+    }
 
     saveState('complete');
-    busy=false;
   }
 
   async function generic(){
@@ -785,16 +832,12 @@
       return later('こちらでも並行して確認を進めています。何か異常を感じた場合は、すぐに中断してください。');
     }
 
-    if(state==='finalCheckHome'){
-      return later('その後、ご自宅に何か異常はありませんか？');
+    if(state==='finalAskStolen'){
+      return later('結局、何か盗まれたものはありましたか？');
     }
 
-    if(state==='finalAskIdentity'){
-      return later('相手が何者だったのか、何か分かったことはありますか？');
-    }
-
-    if(state==='complete'){
-      return later('今回の件については、本部で引き続き確認を進めています。ご協力ありがとうございました。');
+    if(state==='closing' || state==='complete'){
+      return;
     }
 
     return later('ありがとうございます。確認します。',700);
@@ -914,12 +957,12 @@
       return reportPuzzleSolved();
     }
 
-    if(state==='finalCheckHome' && /特に|ない|ありません|大丈夫/.test(v)){
-      return finalHomeSafe();
+    if(state==='finalAskStolen' && /特に|ない|ありません|なかった|ありませんでした/.test(v)){
+      return finalNothingStolen();
     }
 
-    if(state==='finalAskIdentity' && /ヘンタイ|変態|おじさん/.test(v)){
-      return finalRevealIdentity();
+    if(state==='closing' || state==='complete'){
+      return;
     }
 
     return generic();
@@ -993,17 +1036,41 @@
       return;
     }
 
-    if(state==='finalCheckHome'){
+    if(state==='finalAskStolen'){
       recommendations([
-        ['今のところ特にありません',finalHomeSafe,true]
+        ['特にありませんでした',finalNothingStolen,true]
       ]);
       return;
     }
 
-    if(state==='finalAskIdentity'){
-      recommendations([
-        ['怪盗ヘンタイおじさんでした',finalRevealIdentity,true]
-      ]);
+    if(state==='closing' || state==='complete'){
+      showClosedSession();
+      return;
+    }
+  }
+
+
+  function showClosedSession(){
+    clearActions();
+    clearTyping();
+
+    const composer=document.querySelector('.composer');
+    if(composer)composer.style.display='none';
+
+    document.body.classList.add('session-is-closed');
+
+    const closed=document.getElementById('session-closed');
+    if(closed){
+      closed.hidden=false;
+      closed.classList.add('restored');
+    }
+
+    const status=document.getElementById('close-status');
+    if(status)status.textContent='SESSION CLOSED';
+
+    const finalText=document.getElementById('closed-final-text');
+    if(finalText){
+      finalText.textContent='怪盗関連事件特別捜査本部との通信は終了しました。';
     }
   }
 
