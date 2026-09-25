@@ -350,6 +350,81 @@
     return /愛媛|松山|道後/.test(n);
   }
 
+  // 自由入力は「現在の会話フェーズ」で意味を判定する。
+  // AIレコメンドの文言と完全一致しなくても、同じ意味なら進行させる。
+  function intentText(v){
+    return String(v)
+      .normalize('NFKC')
+      .replace(/\s|　/g,'')
+      .replace(/[。、,.!?！？「」『』"'’]/g,'')
+      .toLowerCase();
+  }
+
+  function isDeclineText(v){
+    const t=intentText(v);
+    return /協力しない|協力できない|協力しません|やりません|やらない|無理|いや|嫌|断る|断ります|やめとく/.test(t);
+  }
+
+  function isCooperateText(v){
+    const t=intentText(v);
+    if(isDeclineText(v))return false;
+    return /協力します|協力する|協力したい|手伝います|手伝う|やります|やる|はい|いいよ|了解|お願いします/.test(t);
+  }
+
+  function isGlitchText(v){
+    const t=intentText(v);
+    return /glitch|グリッチ/.test(t);
+  }
+
+  function isSquirrelQrFoundText(v){
+    const t=intentText(v);
+    const found=/見つけ|発見|あった|ありました|出てき|置いてあった|置いてありました/.test(t);
+    const qr=/qr|二次元コード/.test(t);
+    const squirrelUnder=/(リス.*下|下.*リス)/.test(t);
+    return found&&(qr||squirrelUnder);
+  }
+
+  function isSquirrelHomeText(v){
+    const t=intentText(v);
+    return /自宅|自分の家|家です|家に|うち|ウチ/.test(t);
+  }
+
+  function isSquirrelExistingText(v){
+    const t=intentText(v);
+    return /^(はい|うん|そうです|そう)$/i.test(t) ||
+      /前から|以前から|もともと|元々|今回の件より前|昔から/.test(t);
+  }
+
+  function isTakeoverReportText(v){
+    const t=intentText(v);
+    return /怪しい.*(人|人物)|人物.*(話|会話)|誰か.*(話|会話)|unknown|知らない.*(人|相手)|怪盗.*(話|会話|出)|メッセージ.*(来|届|表示)|乗っ取/.test(t);
+  }
+
+  function isUnknownMissingText(v){
+    const t=intentText(v);
+    return /わから|分から|不明|心当たり.*ない|今のところ.*ない|まだ.*分から|確認できない/.test(t);
+  }
+
+  function isNoHomeAbnormalityText(v){
+    const t=intentText(v);
+    return /特に.*ない|何も.*ない|異常.*ない|変わった.*ない|問題.*ない|大丈夫/.test(t);
+  }
+
+  function isContinuePhase2Text(v){
+    const t=intentText(v);
+    return /分かりました|わかりました|分かった|わかった|了解|確認します|確認してみます|見てみます|調べます|やってみます|続けます|^はい$/.test(t);
+  }
+
+  function isPuzzleSolvedText(v){
+    const t=intentText(v);
+    return /謎.*全部.*解け|全部.*謎.*解け|全部.*解け|謎.*解けました|解き終わ|クリアしました|クリアした|終わりました/.test(t);
+  }
+
+  function isNothingStolenText(v){
+    const t=intentText(v);
+    return /特に.*ない|何も.*ない|ありませんでした|なかった|盗まれて.*ない|盗られて.*ない|取られて.*ない/.test(t);
+  }
+
   async function introConversation(){
     if(state!=='start'||busy)return;
 
@@ -429,6 +504,7 @@
 
   async function decline(){
     busy=true;
+    clearActions();
 
     declineCount++;
     localStorage.setItem(DECLINE_KEY,String(declineCount));
@@ -461,6 +537,7 @@
 
   async function cooperate(){
     busy=true;
+    clearActions();
     saveState('mission');
 
     await later('はい、ありがとうございます。',700);
@@ -853,8 +930,9 @@
 
     addUser(v);
     I.value='';
-    clearActions();
 
+    // AIレコメンドは、正しい意図が入力されて次フェーズへ進むまで残す。
+    // 関係ない自由入力では消さない。
     if(state==='verifyDate'){
       busy=true;
 
@@ -900,12 +978,13 @@
     }
 
     if(state==='offer'){
-      if(/協力|やる|はい|いいよ|お願い/.test(v)){
-        return cooperate();
+      // 「協力しない」に「協力」が含まれるため、拒否を先に判定する。
+      if(isDeclineText(v)){
+        return decline();
       }
 
-      if(/しない|無理|いや|嫌|断/.test(v)){
-        return decline();
+      if(isCooperateText(v)){
+        return cooperate();
       }
 
       await later(
@@ -921,43 +1000,43 @@
       return;
     }
 
-    if(state==='mission' && normalize(v).toUpperCase()==='GLITCH'){
+    if(state==='mission' && isGlitchText(v)){
       return receiveGlitch();
     }
 
-    if(state==='askSquirrelQR' && /QR|リス|見つけ/.test(v)){
+    if(state==='askSquirrelQR' && isSquirrelQrFoundText(v)){
       return reportSquirrelQR();
     }
 
-    if(state==='askSquirrelWhere' && /家|自宅|うち/.test(v)){
+    if(state==='askSquirrelWhere' && isSquirrelHomeText(v)){
       return reportSquirrelHome();
     }
 
-    if(state==='askSquirrelExisting' && /はい|そう|前から|以前から/.test(v)){
+    if(state==='askSquirrelExisting' && isSquirrelExistingText(v)){
       return confirmSquirrelExisting();
     }
 
-    if(state==='afterTakeover' && /怪しい|人物|会話|誰か/.test(v)){
+    if(state==='afterTakeover' && isTakeoverReportText(v)){
       return reportPossibleIntrusion();
     }
 
-    if(state==='askStolenItem' && /わから|分から|今のところ|ない|ありません/.test(v)){
+    if(state==='askStolenItem' && isUnknownMissingText(v)){
       return reportNoKnownMissing();
     }
 
-    if(state==='askHomeAbnormality' && /特に|ない|ありません|大丈夫/.test(v)){
+    if(state==='askHomeAbnormality' && isNoHomeAbnormalityText(v)){
       return reportNoHomeAbnormality();
     }
 
-    if(state==='askContinuePhase2' && /分かりました|確認|やります|はい/.test(v)){
+    if(state==='askContinuePhase2' && isContinuePhase2Text(v)){
       return confirmContinuePhase2();
     }
 
-    if(state==='phase2' && /(謎.*(全部)?解け|全部.*解け|解き終わ|クリア)/.test(v)){
+    if(state==='phase2' && isPuzzleSolvedText(v)){
       return reportPuzzleSolved();
     }
 
-    if(state==='finalAskStolen' && /特に|ない|ありません|なかった|ありませんでした/.test(v)){
+    if(state==='finalAskStolen' && isNothingStolenText(v)){
       return finalNothingStolen();
     }
 
