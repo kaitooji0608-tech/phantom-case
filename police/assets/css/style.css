@@ -20,7 +20,7 @@ body.chat-page{min-height:100vh;background:linear-gradient(180deg,#e9eef3 0,#f6f
 .staff-photo.makabe,.staff-card-photo.makabe{background-image:url("../img/staff/makabe-v2.png")}
 .staff-photo.takase,.staff-card-photo.takase{background-image:url("../img/staff/takase-v2.png")}
 .staff-photo.nagato,.staff-card-photo.nagato{background-image:url("../img/staff/nagato-v2.png")}
-.staff-photo.misaki,.staff-card-photo.misaki{background-image:url("../img/staff/misaki.webp")}
+.staff-photo.misaki,.staff-card-photo.misaki{background-image:url("../img/staff/misaki-v2.png")}
 .staff-photo.mizuno,.staff-card-photo.mizuno{background-image:url("../img/staff/mizuno.webp")}
 .staff-profile-hero{display:grid;grid-template-columns:300px 1fr;gap:42px;align-items:start}
 .staff-roleline{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
