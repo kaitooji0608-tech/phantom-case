@@ -7,21 +7,21 @@ body.chat-page{min-height:100vh;background:linear-gradient(180deg,#e9eef3 0,#f6f
 .staff-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
 .staff-card{display:block;background:#fff;border:1px solid var(--line);border-radius:5px;overflow:hidden;color:inherit;box-shadow:0 2px 8px rgba(13,44,76,.05);transition:.2s}
 .staff-card:hover{text-decoration:none;transform:translateY(-2px);box-shadow:0 8px 24px rgba(13,44,76,.12);border-color:#9db5c8}
-.staff-card-photo,.staff-photo{background-image:url("../img/staff/staff-sprite.webp");background-repeat:no-repeat;background-size:400% 200%;background-color:#dbe3e8}
+.staff-card-photo,.staff-photo{background-repeat:no-repeat;background-size:cover;background-position:center;background-color:#dbe3e8}
 .staff-card-photo{aspect-ratio:4/5;width:100%;background-position:center}
 .staff-card-body{padding:16px 17px 18px}
 .staff-card-body h3{margin:0 0 4px;font-size:18px;color:#183957}
 .staff-card-body p{margin:7px 0 0;font-size:13px;line-height:1.7;color:#65717c}
 .staff-card .tag{margin-top:4px}
 .staff-photo{aspect-ratio:4/5;width:100%;border:1px solid #c9d3da;border-radius:4px;box-shadow:0 8px 26px rgba(13,44,76,.12)}
-.staff-photo.sakakibara,.staff-card-photo.sakakibara{background-position:0% 0%}
-.staff-photo.aizawa,.staff-card-photo.aizawa{background-position:33.333% 0%}
-.staff-photo.kohinata,.staff-card-photo.kohinata{background-position:66.667% 0%}
-.staff-photo.makabe,.staff-card-photo.makabe{background-position:100% 0%}
-.staff-photo.takase,.staff-card-photo.takase{background-position:0% 100%}
-.staff-photo.nagato,.staff-card-photo.nagato{background-position:33.333% 100%}
-.staff-photo.misaki,.staff-card-photo.misaki{background-position:66.667% 100%}
-.staff-photo.mizuno,.staff-card-photo.mizuno{background-position:100% 100%}
+.staff-photo.sakakibara,.staff-card-photo.sakakibara{background-image:url("../img/staff/sakakibara.webp")}
+.staff-photo.aizawa,.staff-card-photo.aizawa{background-image:url("../img/staff/aizawa.webp")}
+.staff-photo.kohinata,.staff-card-photo.kohinata{background-image:url("../img/staff/kohinata.webp")}
+.staff-photo.makabe,.staff-card-photo.makabe{background-image:url("../img/staff/makabe.webp")}
+.staff-photo.takase,.staff-card-photo.takase{background-image:url("../img/staff/takase.webp")}
+.staff-photo.nagato,.staff-card-photo.nagato{background-image:url("../img/staff/nagato.webp")}
+.staff-photo.misaki,.staff-card-photo.misaki{background-image:url("../img/staff/misaki.webp")}
+.staff-photo.mizuno,.staff-card-photo.mizuno{background-image:url("../img/staff/mizuno.webp")}
 .staff-profile-hero{display:grid;grid-template-columns:300px 1fr;gap:42px;align-items:start}
 .staff-roleline{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
 .staff-intro{font-size:16px;line-height:1.9;color:#334655;margin:0 0 20px}
