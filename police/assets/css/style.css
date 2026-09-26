@@ -99,10 +99,10 @@ body[data-secret-path="records/gr-delete-note/"] .glitch-text-note__filename{bac
 body[data-secret-path="records/gr-delete-note/"] .glitch-text-note pre{margin:0;padding:30px 32px 52px;white-space:pre-wrap;overflow-wrap:anywhere;color:#e6ebeb;font:15px/1.9 ui-monospace,SFMono-Regular,Menlo,monospace}
 @media(max-width:760px){body[data-secret-path="records/gr-delete-note/"] .glitch-text-note pre{padding:24px 18px 42px;font-size:14px}}
 
-/* Supplemental comparison slip, rendered as text for exact names and legibility. */
-body[data-secret-path="records/mf-similarity/"] .similarity-scan{background:#f5f2ea;color:#27323a;border:1px solid #a3a39d;box-shadow:0 5px 22px rgba(0,0,0,.18);padding:32px 38px 24px;max-width:660px;min-height:390px;display:flex;flex-direction:column;font-size:15px;line-height:1.9}
-body[data-secret-path="records/mf-similarity/"] .similarity-scan h3{margin:0 0 20px;font-size:21px;letter-spacing:.04em}
-body[data-secret-path="records/mf-similarity/"] .similarity-scan p{margin:0 0 12px}
-body[data-secret-path="records/mf-similarity/"] .similarity-scan__cases{font-size:16px;margin-bottom:24px!important}
-body[data-secret-path="records/mf-similarity/"] .similarity-scan__sign{margin-top:auto;align-self:flex-end;padding-top:28px;font-size:17px;letter-spacing:.05em}
-@media(max-width:760px){body[data-secret-path="records/mf-similarity/"] .similarity-scan{padding:22px 18px;min-height:0;font-size:14px}}
+/* R.T.'s private handwritten note. */
+body[data-secret-path="records/mf-similarity/"] .handwritten-note{width:min(680px,100%);min-height:440px;margin:8px auto 60px;padding:36px 48px 32px;background:repeating-linear-gradient(to bottom,#f4f0e5 0,#f4f0e5 39px,#d9d4c8 40px);border:1px solid #c6c0b1;box-shadow:0 14px 35px rgba(0,0,0,.29);transform:rotate(-.7deg);color:#243a50;font-family:"YuKyokasho","HGS教科書体","Klee One","Hiragino Maru Gothic ProN",cursive,sans-serif;font-size:20px;line-height:2;letter-spacing:.03em}
+body[data-secret-path="records/mf-similarity/"] .handwritten-note__date{font-size:16px;text-align:right;margin-bottom:24px}
+body[data-secret-path="records/mf-similarity/"] .handwritten-note p{margin:0 0 22px}
+body[data-secret-path="records/mf-similarity/"] .handwritten-note__emphasis{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:5px}
+body[data-secret-path="records/mf-similarity/"] .handwritten-note__signature{text-align:right;font-size:24px;margin-top:18px}
+@media(max-width:760px){body[data-secret-path="records/mf-similarity/"] .handwritten-note{padding:22px 20px;min-height:0;font-size:16px;line-height:2.2;transform:rotate(-.3deg)}body[data-secret-path="records/mf-similarity/"] .handwritten-note__signature{font-size:20px}}
