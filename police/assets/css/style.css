@@ -15,7 +15,7 @@ body.chat-page{min-height:100vh;background:linear-gradient(180deg,#e9eef3 0,#f6f
 .staff-card .tag{margin-top:4px}
 .staff-photo{aspect-ratio:4/5;width:100%;border:1px solid #c9d3da;border-radius:4px;box-shadow:0 8px 26px rgba(13,44,76,.12)}
 .staff-photo.sakakibara,.staff-card-photo.sakakibara{background-image:url("../img/staff/sakakibara-v2.png")}
-.staff-photo.aizawa,.staff-card-photo.aizawa{background-image:url("../img/staff/aizawa.webp")}
+.staff-photo.aizawa,.staff-card-photo.aizawa{background-image:url("../img/staff/aizawa-v2.png")}
 .staff-photo.kohinata,.staff-card-photo.kohinata{background-image:url("../img/staff/kohinata.webp")}
 .staff-photo.makabe,.staff-card-photo.makabe{background-image:url("../img/staff/makabe.webp")}
 .staff-photo.takase,.staff-card-photo.takase{background-image:url("../img/staff/takase.webp")}
