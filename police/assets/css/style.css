@@ -107,6 +107,6 @@ body[data-secret-path="records/mf-similarity/"] .handwritten-note__emphasis{text
 body[data-secret-path="records/mf-similarity/"] .handwritten-note__signature{text-align:right;font-size:24px;margin-top:18px}
 @media(max-width:760px){body[data-secret-path="records/mf-similarity/"] .handwritten-note{padding:22px 20px;min-height:0;font-size:16px;line-height:2.2;transform:rotate(-.3deg)}body[data-secret-path="records/mf-similarity/"] .handwritten-note__signature{font-size:20px}}
 
-/* CASE16 / CASE25: recovered warning letter photographs */
+/* CASE-250602C / CASE-250618M: recovered warning letter photographs */
 .warning-evidence{max-width:880px;margin:0 auto;padding:clamp(12px,3vw,30px);background:#e5e7e6;border:1px solid #cbd0d1;box-shadow:inset 0 0 26px rgba(45,54,58,.07)}
 .warning-letter-image{display:block;width:100%;height:auto;box-shadow:0 12px 25px rgba(33,39,43,.18)}
