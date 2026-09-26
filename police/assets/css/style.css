@@ -44,7 +44,16 @@ body[data-secret-id]:not([data-secret-path="activity/statistics-office/"]){
   color:#e3ebf1;
   background:radial-gradient(ellipse at 50% 0%,#253747 0%,#142331 48%,#0c1823 100%);
 }
-body[data-secret-id]:not([data-secret-path="activity/statistics-office/"]) main a{color:#d7c28e}
+body[data-secret-id]:not([data-secret-path="activity/statistics-office/"]) a{color:#d7c28e}
+body[data-secret-id]:not([data-secret-path="activity/statistics-office/"]) .site-header{background:#162635;box-shadow:0 8px 26px rgba(3,12,20,.22)}
+body[data-secret-id]:not([data-secret-path="activity/statistics-office/"]) .restricted{background:#0a1723;color:#d4bd85}
+body[data-secret-id]:not([data-secret-path="activity/statistics-office/"]) .brand{color:#eef1ee}
+body[data-secret-id]:not([data-secret-path="activity/statistics-office/"]) .brand small{color:#a5b4bf}
+body[data-secret-id]:not([data-secret-path="activity/statistics-office/"]) .seal{color:#d4bf87;border-color:#ae9560}
+body[data-secret-id]:not([data-secret-path="activity/statistics-office/"]) .seal:after{border-color:#6b705f}
+body[data-secret-id]:not([data-secret-path="activity/statistics-office/"]) .global-nav{background:#102130;border-bottom-color:#8a744a}
+body[data-secret-id]:not([data-secret-path="activity/statistics-office/"]) .global-nav a{color:#e3e9ec}
+body[data-secret-id]:not([data-secret-path="activity/statistics-office/"]) .head-search input{background:#edf0f0;color:#172735}
 body[data-secret-id]:not([data-secret-path="activity/statistics-office/"]) .breadcrumb{color:#a4b2bc}
 body[data-secret-id]:not([data-secret-path="activity/statistics-office/"]) .breadcrumb .sep{color:#748594}
 body[data-secret-id]:not([data-secret-path="activity/statistics-office/"]) .page-title{border-bottom-color:#435467}
