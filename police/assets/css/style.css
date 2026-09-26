@@ -107,14 +107,6 @@ body[data-secret-path="records/mf-similarity/"] .handwritten-note__emphasis{text
 body[data-secret-path="records/mf-similarity/"] .handwritten-note__signature{text-align:right;font-size:24px;margin-top:18px}
 @media(max-width:760px){body[data-secret-path="records/mf-similarity/"] .handwritten-note{padding:22px 20px;min-height:0;font-size:16px;line-height:2.2;transform:rotate(-.3deg)}body[data-secret-path="records/mf-similarity/"] .handwritten-note__signature{font-size:20px}}
 
-/* CASE16 / CASE25: recovered warning letters */
-.warning-evidence{max-width:740px;margin:0 auto;padding:clamp(20px,5vw,54px);background:#e5e7e6;border:1px solid #cbd0d1;box-shadow:inset 0 0 26px rgba(45,54,58,.07)}
-.warning-letter{position:relative;isolation:isolate;display:grid;place-items:center;width:100%;min-height:340px;overflow:hidden;border:1px solid #d5c9af;background:linear-gradient(112deg,rgba(117,88,41,.045),transparent 35%,rgba(117,88,41,.025) 67%,rgba(117,88,41,.07)),linear-gradient(#f9f2df,#f5ecd6);box-shadow:0 14px 19px rgba(33,39,43,.2),0 2px 4px rgba(33,39,43,.12);transform:rotate(-1.15deg)}
-.warning-letter::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,transparent 49.7%,rgba(90,74,47,.085) 50%,rgba(255,255,255,.23) 50.2%,transparent 50.7%),linear-gradient(180deg,transparent 49.5%,rgba(90,74,47,.07) 50%,rgba(255,255,255,.23) 50.4%,transparent 51%);pointer-events:none}
-.warning-letter::after{content:"";position:absolute;inset:0;z-index:-1;box-shadow:inset 0 0 22px rgba(100,77,44,.11);background:repeating-linear-gradient(12deg,transparent 0 7px,rgba(77,60,37,.008) 8px 9px);pointer-events:none}
-.warning-letter__ink{margin:0;padding:30px 18px;color:#27354c;font-family:"Klee One","YuKyokasho","HGS教科書体","Hiragino Maru Gothic ProN",cursive;font-size:clamp(29px,5vw,45px);font-weight:400;line-height:1.9;letter-spacing:.09em;text-align:center;text-shadow:.35px .4px .3px rgba(18,31,53,.24);transform:rotate(-2deg)}
-.warning-letter__ink span{display:block;white-space:nowrap}
-.warning-letter__ink span+span{margin-left:1.8em}
-.warning-letter--second{transform:rotate(.65deg);background:linear-gradient(117deg,rgba(117,88,41,.06),transparent 36%,rgba(117,88,41,.02) 70%,rgba(117,88,41,.075)),linear-gradient(#f8f0dc,#f4ead3)}
-.warning-letter--second .warning-letter__ink{transform:translate(2px,2px) rotate(-1.5deg);color:#283950}
-@media(max-width:600px){.warning-evidence{padding:17px}.warning-letter{min-height:260px}.warning-letter__ink{font-size:clamp(25px,6.2vw,35px);letter-spacing:.03em;padding:18px 8px}}
+/* CASE16 / CASE25: recovered warning letter photographs */
+.warning-evidence{max-width:880px;margin:0 auto;padding:clamp(12px,3vw,30px);background:#e5e7e6;border:1px solid #cbd0d1;box-shadow:inset 0 0 26px rgba(45,54,58,.07)}
+.warning-letter-image{display:block;width:100%;height:auto;box-shadow:0 12px 25px rgba(33,39,43,.18)}
